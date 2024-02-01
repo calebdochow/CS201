@@ -12,19 +12,39 @@ private:
     size_t front;
 
 public:
-    CircularDynamicArray() : capacity(2), size(0), front(0) {
+    CircularDynamicArray() : capacity(2), size(0), front(0) { //Default Constructor
         array = new T[capacity];
     }
 
-    CircularDynamicArray(size_t s) : capacity(s), size(s), front(0) {
+    CircularDynamicArray(size_t s) : capacity(s), size(s), front(0) { //Constructor
         array = new T[s];
     }
 
-    ~CircularDynamicArray() {
+    ~CircularDynamicArray() { //Deconstructor
         delete[] array;
     }
 
-    //ADD COPY CONSTRUCTOR
+    CircularDynamicArray(const CircularDynamicArray& other) : capacity(other.capacity), size(other.size), front(other.front) { //Copy Constructor
+        array = new T[capacity];
+        for (size_t i = 0; i < size; ++i) {
+            array[i] = other.array[(other.front + i) % other.capacity];
+        }
+    }
+    
+    CircularDynamicArray& operator=(const CircularDynamicArray& other) { //Copy Assignment Contructor
+        if (this != &other) {
+            delete[] array;
+            capacity = other.capacity;
+            size = other.size;
+            front = other.front;
+            array = new T[capacity];
+            for (size_t i = 0; i < size; ++i) {
+                array[i] = other.array[(other.front + i) % other.capacity];
+            }
+        }
+        return *this;
+    }
+
 
     void addEnd(size_t v) {
         if (size == capacity) {
