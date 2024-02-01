@@ -100,11 +100,6 @@ public:
         array = new T[capacity];
     }
 
-    size_t QSelect(int k) {
-        // Implementation here
-        return 0;
-    }
-
     void Sort() {
     if (size > 1) {
         T* tempArray = new T[size];
@@ -184,6 +179,11 @@ public:
     }
 
     int binSearch(size_t e){
+        return 0;
+    }
+
+    size_t QSelect(int k) {
+        // Implementation here
         return 0;
     }
 
