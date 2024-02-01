@@ -56,7 +56,7 @@ public:
 
     void addFront(size_t v) {
         if (size == capacity) {
-            resize();
+            resize(capacity * 2);
         }
         front = (front - 1 + capacity) % capacity;
         array[front] = v;
@@ -106,8 +106,77 @@ public:
     }
 
     void Sort() {
-        // Implementation here
+    if (size > 1) {
+        T* tempArray = new T[size];
+        mergeSort(0, size-1, tempArray);
+        delete[] tempArray;
     }
+    }
+
+    void mergeSort(size_t left, size_t right, T* tempArray) {
+        if (left < right) {
+            size_t middle = left + (right - left) / 2;
+            mergeSort(left, middle, tempArray);
+            mergeSort(middle + 1, right, tempArray);
+            merge(left, right, middle, tempArray);
+        }
+    }
+
+    void merge(size_t left, size_t right, size_t middle, T* tempArray) {
+        size_t leftSize = middle - left + 1;
+        size_t rightSize = right - middle;
+
+        T* leftArray = new T[leftSize];
+        T* rightArray = new T[rightSize];
+
+        // Populate leftArray and rightArray
+        for (size_t i = 0; i < leftSize; i++) {
+            leftArray[i] = array[(left + i) % capacity];
+        }
+
+        for (size_t i = 0; i < rightSize; i++) {
+            rightArray[i] = array[(middle + 1 + i) % capacity];
+        }
+
+        size_t leftIndex = 0;
+        size_t rightIndex = 0;
+        size_t mergedIndex = left;
+
+        // Merge leftArray and rightArray back into tempArray
+        while (leftIndex < leftSize && rightIndex < rightSize) {
+            if (leftArray[leftIndex] <= rightArray[rightIndex]) {
+                tempArray[mergedIndex] = leftArray[leftIndex];
+                leftIndex++;
+            } else {
+                tempArray[mergedIndex] = rightArray[rightIndex];
+                rightIndex++;
+            }
+            mergedIndex++;
+        }
+
+        // Copy the remaining elements from leftArray, if any
+        while (leftIndex < leftSize) {
+            tempArray[mergedIndex] = leftArray[leftIndex];
+            leftIndex++;
+            mergedIndex++;
+        }
+
+        // Copy the remaining elements from rightArray, if any
+        while (rightIndex < rightSize) {
+            tempArray[mergedIndex] = rightArray[rightIndex];
+            rightIndex++;
+            mergedIndex++;
+        }
+
+        // Copy the sorted elements back to the original array
+        for (size_t i = left; i <= right; i++) {
+            array[i % capacity] = tempArray[i];
+        }
+
+        delete[] leftArray;
+        delete[] rightArray;
+    }
+
 
     int linearSearch(size_t e) {
         // Implementation here
@@ -151,31 +220,20 @@ public:
 };
 
 int main(int argc, char* argv[]) {
-    CircularDynamicArray<float> C(10);
+    CircularDynamicArray<int> C(10);
 	for (int i=0; i< C.length();i++) C[i] = i;
 	for (int i=0; i< C.length();i++) cout << C[i] << " ";  cout << endl;
 	// C => "0 1 2 3 4 5 6 7 8 9"
 	C.delFront();
 	for (int i=0; i< C.length();i++) cout << C[i] << " ";  cout << endl;
 	// C => "1 2 3 4 5 6 7 8 9"
-	C.delEnd();
-	for (int i=0; i< C.length();i++) cout << C[i] << " ";  cout << endl;
-	// C => "1 2 3 4 5 6 7 8"
-	C.addEnd(100.0);
-	for (int i=0; i< C.length();i++) cout << C[i] << " ";  cout << endl;
-	// C => "1 2 3 4 5 6 7 8 100"
-	C.delFront();
-	C.addEnd(200.0);
+	C.addFront(12);
+    C.addFront(19);
+    C.addEnd(20);
+    C.addEnd(13);
     for (int i=0; i< C.length();i++) cout << C[i] << " ";  cout << endl;
-	// C => "2 3 4 5 6 7 8 100 200"	
+    C.Sort();
+    for (int i=0; i< C.length();i++) cout << C[i] << " ";  cout << endl;
 
-	C.addEnd(300.0);
-	C.addEnd(400.0);
-    for (int i=0; i< C.length();i++) cout << C[i] << " ";  cout << endl;
-	// C => "2 3 4 5 6 7 8 100 200 300 400"	
-	
-	C.delEnd(); C.delFront();C.delEnd();
-	for (int i=0; i< C.length();i++) cout << C[i] << " ";  cout << endl;
-	// C => "3 4 5 6 7 8 100 200"	
     return 0;
 }
