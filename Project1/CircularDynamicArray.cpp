@@ -1,6 +1,5 @@
 //Caleb Dochow
 //1-30-24
-//Brandon is a loser
 #include <iostream>
 using namespace std;
 
