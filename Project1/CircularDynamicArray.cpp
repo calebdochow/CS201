@@ -61,6 +61,7 @@ public:
         }
         front = (front - 1 + capacity) % capacity;
         array[front] = v;
+        size++;
     }
 
     void delEnd() {
