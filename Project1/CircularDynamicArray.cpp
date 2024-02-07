@@ -7,16 +7,16 @@ template <typename T>
 class CircularDynamicArray {
 private:
     T* array;
-    size_t capacity;
+    size_t cap;
     size_t size;
     size_t front;
 
 public:
-    CircularDynamicArray() : capacity(2), size(0), front(0) { //Default Constructor
-        array = new T[capacity];
+    CircularDynamicArray() : cap(2), size(0), front(0) { //Default Constructor
+        array = new T[cap];
     }
 
-    CircularDynamicArray(size_t s) : capacity(s), size(s), front(0) { //Constructor
+    CircularDynamicArray(size_t s) : cap(s), size(s), front(0) { //Constructor
         array = new T[s];
     }
 
@@ -24,22 +24,22 @@ public:
         delete[] array;
     }
 
-    CircularDynamicArray(const CircularDynamicArray& other) : capacity(other.capacity), size(other.size), front(other.front) { //Copy Constructor
-        array = new T[capacity];
+    CircularDynamicArray(const CircularDynamicArray& other) : cap(other.cap), size(other.size), front(other.front) { //Copy Constructor
+        array = new T[cap];
         for (size_t i = 0; i < size; ++i) {
-            array[i] = other.array[(other.front + i) % other.capacity];
+            array[i] = other.array[(other.front + i) % other.cap];
         }
     }
     
     CircularDynamicArray& operator=(const CircularDynamicArray& other) { //Copy Assignment Contructor
         if (this != &other) {
             delete[] array;
-            capacity = other.capacity;
+            cap = other.cap;
             size = other.size;
             front = other.front;
-            array = new T[capacity];
+            array = new T[cap];
             for (size_t i = 0; i < size; ++i) {
-                array[i] = other.array[(other.front + i) % other.capacity];
+                array[i] = other.array[(other.front + i) % other.cap];
             }
         }
         return *this;
@@ -47,31 +47,31 @@ public:
 
 
     void addEnd(size_t v) {
-        if (size == capacity) {
-            resize(capacity * 2);
+        if (size == cap) {
+            resize(cap * 2);
         }
-        array[(front + size) % capacity] = v;
+        array[(front + size) % cap] = v;
         size++;
     }
 
     void addFront(size_t v) {
-        if (size == capacity) {
-            resize(capacity * 2);
+        if (size == cap) {
+            resize(cap * 2);
         }
-        front = (front - 1 + capacity) % capacity;
+        front = (front - 1 + cap) % cap;
         array[front] = v;
         size++;
     }
 
     void delEnd() {
         if (size > 0) {
-            size_t indexToRemove = (front + size - 1) % capacity;
-            swapElements(indexToRemove, capacity - 1);
+            size_t indexToRemove = (front + size - 1) % cap;
+            swapElements(indexToRemove, cap - 1);
             size--;
-            swapElements(indexToRemove, capacity - 1);
+            swapElements(indexToRemove, cap - 1);
 
-            if (size <= capacity / 4 && capacity / 2 >= 2) {
-                resize(capacity / 2);
+            if (size <= cap / 4 && cap / 2 >= 2) {
+                resize(cap / 2);
             }
         }
     }
@@ -79,7 +79,7 @@ public:
 
     void delFront() {
         if (size > 0) {
-            front = (front + 1) % capacity;
+            front = (front + 1) % cap;
             size--;
         }
     }
@@ -89,88 +89,84 @@ public:
         return size;
     }
 
-    int getCapacity() {
-        return capacity; 
+    int capacity() {
+        return cap; 
+    }
+
+    int getFront(){
+        return front;
     }
 
     void clear() {
         delete[] array;
-        capacity = 2;
+        cap = 2;
         size = 0;
         front = 0;
-        array = new T[capacity];
+        array = new T[cap];
+    }
+
+    void normalize(){
+        T* normalizedArray = new T[size];
+        for(int i = 0; i < size; i++){
+            normalizedArray[i] = array[(front + i) % cap];
+        }
+        for (size_t i = 0; i < size; i++) {
+            array[i] = normalizedArray[i];
+        }
+        front = 0;
+        delete[] normalizedArray;
     }
 
     void Sort() {
-    if (size > 1) {
+        if (size > 1) {
+        normalize();
         T* tempArray = new T[size];
-        mergeSort(0, size-1, tempArray);
+        mergeSort(tempArray, front, size - 1);
         delete[] tempArray;
-    }
-    }
-
-    void mergeSort(size_t left, size_t right, T* tempArray) {
-        if (left < right) {
-            size_t middle = left + (right - left) / 2;
-            mergeSort(left, middle, tempArray);
-            mergeSort(middle + 1, right, tempArray);
-            merge(left, right, middle, tempArray);
         }
     }
 
-    void merge(size_t left, size_t right, size_t middle, T* tempArray) {
-        size_t leftSize = middle - left + 1;
-        size_t rightSize = right - middle;
+    void mergeSort(T* tempArray, size_t left, size_t right) {
+        if(left < right){
+            size_t middle = (left + right) / 2;
+            mergeSort(tempArray, left, middle);
+            mergeSort(tempArray, middle + 1, right);
+            merge(tempArray, left, middle, right);
+        } 
+    }
 
-        T* leftArray = new T[leftSize];
-        T* rightArray = new T[rightSize];
+    void merge(T* tempArray, size_t left, size_t middle, size_t right) {
+        int i = left;
+        int j = middle + 1;
+        int k = left;
 
-        // Populate leftArray and rightArray
-        for (size_t i = 0; i < leftSize; i++) {
-            leftArray[i] = array[(left + i) % capacity];
-        }
-
-        for (size_t i = 0; i < rightSize; i++) {
-            rightArray[i] = array[(middle + 1 + i) % capacity];
-        }
-
-        size_t leftIndex = 0;
-        size_t rightIndex = 0;
-        size_t mergedIndex = left;
-
-        // Merge leftArray and rightArray back into tempArray
-        while (leftIndex < leftSize && rightIndex < rightSize) {
-            if (leftArray[leftIndex] <= rightArray[rightIndex]) {
-                tempArray[mergedIndex] = leftArray[leftIndex];
-                leftIndex++;
-            } else {
-                tempArray[mergedIndex] = rightArray[rightIndex];
-                rightIndex++;
+        while(i <= middle && j <= right){
+            if(array[i] <= array[j]){
+                tempArray[k] = array[i];
+                i++;
+                k++;
+            }else{
+                tempArray[k] = array[j];
+                j++;
+                k++;
             }
-            mergedIndex++;
         }
 
-        // Copy the remaining elements from leftArray, if any
-        while (leftIndex < leftSize) {
-            tempArray[mergedIndex] = leftArray[leftIndex];
-            leftIndex++;
-            mergedIndex++;
+        while(i <= middle){
+            tempArray[k] = array[i];
+            i++;
+            k++;
         }
 
-        // Copy the remaining elements from rightArray, if any
-        while (rightIndex < rightSize) {
-            tempArray[mergedIndex] = rightArray[rightIndex];
-            rightIndex++;
-            mergedIndex++;
+        while(j <= right){
+            tempArray[k] = array[j];
+            j++;
+            k++;
         }
 
-        // Copy the sorted elements back to the original array
-        for (size_t i = left; i <= right; i++) {
-            array[i % capacity] = tempArray[i];
+        for(int s = 0; s <= right; s++){
+            array[s] = tempArray[s];
         }
-
-        delete[] leftArray;
-        delete[] rightArray;
     }
 
 
@@ -191,12 +187,12 @@ public:
         T* newArray = new T[newCapacity];
     
         for (size_t i = 0; i < size; i++) {
-            newArray[i] = array[(front + i) % capacity];
+            newArray[i] = array[(front + i) % cap];
         }
     
         delete[] array;
         array = newArray;
-        capacity = newCapacity;
+        cap = newCapacity;
         front = 0;
     }
 
@@ -211,7 +207,7 @@ public:
 
     T& operator[](size_t index) {
         if (index < size) {
-            size_t actualIndex = (front + index) % capacity;
+            size_t actualIndex = (front + index) % cap;
             return array[actualIndex];
         } else {
             throw out_of_range("Index out of bounds");
@@ -231,9 +227,23 @@ int main(int argc, char* argv[]) {
     C.addFront(19);
     C.addEnd(20);
     C.addEnd(13);
+
+    // C => "19 12 1 2 3 4 5 6 7 8 9 20 13"
     for (int i=0; i< C.length();i++) cout << C[i] << " ";  cout << endl;
+    cout << "-----------------------"<<endl;
+    cout << "Capacity: " << C.capacity() << endl;
+    cout << "Size: " << C.length() << endl;
+    cout << "Front: " << C.getFront() << endl;
+    cout << "-----------------------"<<endl;
+    
     C.Sort();
     for (int i=0; i< C.length();i++) cout << C[i] << " ";  cout << endl;
+    cout << "-----------------------"<<endl;
+    cout << "Capacity: " << C.capacity() << endl;
+    cout << "Size: " << C.length() << endl;
+    cout << "Front: " << C.getFront() << endl;
+    cout << "-----------------------"<<endl;
+
 
     return 0;
 }
