@@ -171,12 +171,28 @@ public:
 
 
     int linearSearch(size_t e) {
-        // Implementation here
-        return 0;
+        for(size_t i = 0; i < size; i++){
+            if(array[i] == e){
+                return i;
+            }
+        }
+        return -1;
     }
 
     int binSearch(size_t e){
-        return 0;
+        int tempLeft = 0;
+        int tempRight = size - 1;
+        while (tempLeft <= tempRight) {
+            int mid = tempLeft + (tempRight - tempLeft) / 2;
+            if (array[mid] == e) {
+                return mid;
+            } else if (array[mid] < e) {
+                tempLeft = mid + 1;
+            } else {
+                tempRight = mid - 1; 
+            }
+        }
+        return -1;
     }
 
     size_t QSelect(int k) {
@@ -230,14 +246,16 @@ int main(int argc, char* argv[]) {
 
     // C => "19 12 1 2 3 4 5 6 7 8 9 20 13"
     for (int i=0; i< C.length();i++) cout << C[i] << " ";  cout << endl;
+    cout << "13 is found at: " << C.binSearch(13) << endl;
     cout << "-----------------------"<<endl;
     cout << "Capacity: " << C.capacity() << endl;
     cout << "Size: " << C.length() << endl;
     cout << "Front: " << C.getFront() << endl;
     cout << "-----------------------"<<endl;
-    
+    cout << endl << endl;
     C.Sort();
     for (int i=0; i< C.length();i++) cout << C[i] << " ";  cout << endl;
+    cout << "13 is found at: " << C.binSearch(13) << endl;
     cout << "-----------------------"<<endl;
     cout << "Capacity: " << C.capacity() << endl;
     cout << "Size: " << C.length() << endl;
