@@ -1,6 +1,7 @@
 //Caleb Dochow
 //1-30-24
 #include <iostream>
+#include <cstdlib>
 using namespace std;
 
 template <typename T>
@@ -170,7 +171,7 @@ public:
     }
 
 
-    int linearSearch(size_t e) {
+    int linearSearch(T e) {
         for(size_t i = 0; i < size; i++){
             if(array[i] == e){
                 return i;
@@ -179,7 +180,7 @@ public:
         return -1;
     }
 
-    int binSearch(size_t e){
+    int binSearch(T e){
         int tempLeft = 0;
         int tempRight = size - 1;
         while (tempLeft <= tempRight) {
@@ -195,8 +196,37 @@ public:
         return -1;
     }
 
-    size_t QSelect(int k) {
-        return 0;
+    int partition(int left, int right){
+        int pivot = array[rand() % (size - 1)]; //pivot selected at random
+        int i = left;
+
+        for(int j = left; j <= right - 1; j++){
+            if(array[j] <= pivot){
+                swapElements(i, j);
+                i++;
+            }
+        }
+        swapElements(i, right);
+        return i;
+    }
+    
+    T QSelect(int k) {
+        normalize();
+        if(k > 0 && k <= right - left + 1){
+            size_t index = partition(front, size - 1);
+
+            if(index - left == k - 1){
+                return array[index];
+            }
+
+            if(index - left > k - 1){
+                
+                //return QSelect() //return kthSmallest(arr, l, index - 1, k); 
+            }
+
+            //return kthSmallest(arr, index + 1, r,  k - index + l - 1); 
+        }
+        return -1;
     }
 
     void resize(size_t newCapacity) {
