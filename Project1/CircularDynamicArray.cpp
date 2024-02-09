@@ -8,16 +8,16 @@ template <typename T>
 class CircularDynamicArray {
 private:
     T* array;
-    size_t cap;
-    size_t size;
-    size_t front;
+    int cap;
+    int size;
+    int front;
 
 public:
     CircularDynamicArray() : cap(2), size(0), front(0) { //Default Constructor
         array = new T[cap];
     }
 
-    CircularDynamicArray(size_t s) : cap(s), size(s), front(0) { //Constructor
+    CircularDynamicArray(int s) : cap(s), size(s), front(0) { //Constructor
         array = new T[s];
     }
 
@@ -27,27 +27,26 @@ public:
 
     CircularDynamicArray(const CircularDynamicArray& other) : cap(other.cap), size(other.size), front(other.front) { //Copy Constructor
         array = new T[cap];
-        for (size_t i = 0; i < size; ++i) {
+        for (int i = 0; i < size; ++i) {
             array[i] = other.array[(other.front + i) % other.cap];
         }
     }
     
-    CircularDynamicArray& operator=(const CircularDynamicArray& other) { //Copy Assignment Contructor
+    T& operator=(const CircularDynamicArray& other) { //Copy Assignment Contructor
         if (this != &other) {
             delete[] array;
             cap = other.cap;
             size = other.size;
             front = other.front;
             array = new T[cap];
-            for (size_t i = 0; i < size; ++i) {
+            for (int i = 0; i < size; ++i) {
                 array[i] = other.array[(other.front + i) % other.cap];
             }
         }
         return *this;
     }
 
-
-    void addEnd(size_t v) {
+    void addEnd(int v) {
         if (size == cap) {
             resize(cap * 2);
         }
@@ -55,7 +54,7 @@ public:
         size++;
     }
 
-    void addFront(size_t v) {
+    void addFront(int v) {
         if (size == cap) {
             resize(cap * 2);
         }
@@ -66,7 +65,7 @@ public:
 
     void delEnd() {
         if (size > 0) {
-            size_t indexToRemove = (front + size - 1) % cap;
+            int indexToRemove = (front + size - 1) % cap;
             swapElements(indexToRemove, cap - 1);
             size--;
             swapElements(indexToRemove, cap - 1);
@@ -77,14 +76,12 @@ public:
         }
     }
 
-
     void delFront() {
         if (size > 0) {
             front = (front + 1) % cap;
             size--;
         }
     }
-
 
     int length() {
         return size;
@@ -111,7 +108,7 @@ public:
         for(int i = 0; i < size; i++){
             normalizedArray[i] = array[(front + i) % cap];
         }
-        for (size_t i = 0; i < size; i++) {
+        for (int i = 0; i < size; i++) {
             array[i] = normalizedArray[i];
         }
         front = 0;
@@ -127,16 +124,16 @@ public:
         }
     }
 
-    void mergeSort(T* tempArray, size_t left, size_t right) {
+    void mergeSort(T* tempArray, int left, int right) {
         if(left < right){
-            size_t middle = (left + right) / 2;
+            int middle = (left + right) / 2;
             mergeSort(tempArray, left, middle);
             mergeSort(tempArray, middle + 1, right);
             merge(tempArray, left, middle, right);
         } 
     }
 
-    void merge(T* tempArray, size_t left, size_t middle, size_t right) {
+    void merge(T* tempArray, int left, int middle, int right) {
         int i = left;
         int j = middle + 1;
         int k = left;
@@ -172,7 +169,7 @@ public:
 
 
     int linearSearch(T e) {
-        for(size_t i = 0; i < size; i++){
+        for(int i = 0; i < size; i++){
             if(array[i] == e){
                 return i;
             }
@@ -197,7 +194,8 @@ public:
     }
 
     int partition(int left, int right){
-        int pivot = array[rand() % (size - 1)]; //pivot selected at random
+        int pivotIndex = rand() % (right - left + 1) + left;
+        int pivot = array[pivotIndex]; //pivot selected at random
         int i = left;
 
         for(int j = left; j <= right - 1; j++){
@@ -209,11 +207,10 @@ public:
         swapElements(i, right);
         return i;
     }
-    
-    T QSelect(int k) {
-        normalize();
+
+    T kthSmallest(int left, int right, int k){
         if(k > 0 && k <= right - left + 1){
-            size_t index = partition(front, size - 1);
+            int index = partition(front, size - 1);
 
             if(index - left == k - 1){
                 return array[index];
@@ -221,18 +218,22 @@ public:
 
             if(index - left > k - 1){
                 
-                //return QSelect() //return kthSmallest(arr, l, index - 1, k); 
+                return kthSmallest(left, index - 1, k); 
             }
 
-            //return kthSmallest(arr, index + 1, r,  k - index + l - 1); 
+            return kthSmallest(index + 1, right,  k - index + left - 1); 
         }
         return -1;
     }
 
-    void resize(size_t newCapacity) {
+    T QSelect(int k) {
+        normalize();
+        return kthSmallest(0, size - 1, k);
+    }
+    void resize(int newCapacity) {
         T* newArray = new T[newCapacity];
     
-        for (size_t i = 0; i < size; i++) {
+        for (int i = 0; i < size; i++) {
             newArray[i] = array[(front + i) % cap];
         }
     
@@ -243,7 +244,7 @@ public:
     }
 
 
-    void swapElements(size_t index1, size_t index2) {
+    void swapElements(int index1, int index2) {
         if (index1 < size && index2 < size && index1 != index2) {
             T temp = array[index1];
             array[index1] = array[index2];
@@ -251,9 +252,9 @@ public:
         }
     }
 
-    T& operator[](size_t index) {
+    T& operator[](int index) {
         if (index < size) {
-            size_t actualIndex = (front + index) % cap;
+            int actualIndex = (front + index) % cap;
             return array[actualIndex];
         } else {
             throw out_of_range("Index out of bounds");
@@ -291,6 +292,8 @@ int main(int argc, char* argv[]) {
     cout << "Size: " << C.length() << endl;
     cout << "Front: " << C.getFront() << endl;
     cout << "-----------------------"<<endl;
+
+    cout << "3rd smallest is: " << C.QSelect(3) << endl;
 
 
     return 0;
