@@ -225,34 +225,37 @@ public:
     }
 
     int partition(int left, int right){
-        int pivotIndex = rand() % (right - left + 1) + left;
-        int pivot = array[pivotIndex]; //pivot selected at random
-        int i = left;
+        if(left >= right){
+            return left;
+        }
+        int pivotIndex = left + rand() % (right - left + 1);
+        T pivot = array[pivotIndex]; //pivot selected at random
+        int i = left - 1;
 
-        for(int j = left; j <= right - 1; j++){
+        for(int j = left; j <= right; j++){
             if(array[j] <= pivot){
-                swapElements(i, j);
                 i++;
+                swapElements(i, j);
             }
         }
-        swapElements(i, right);
-        return i;
+        swapElements(i + 1, pivotIndex);
+        return i + 1;
     }
 
     T kthSmallest(int left, int right, int k){
         if(k > 0 && k <= right - left + 1){
-            int index = partition(front, size - 1);
+            int index = partition(left, right);
 
             if(index - left == k - 1){
                 return array[index];
-            }
 
-            if(index - left > k - 1){
-                
+            }else if(index - left >= k - 1){
                 return kthSmallest(left, index - 1, k); 
-            }
 
-            return kthSmallest(index + 1, right,  k - index + left - 1); 
+            }else{
+                return kthSmallest(index + 1, right,  k - index + left - 1); 
+
+            }
         }
         return -1;
     }

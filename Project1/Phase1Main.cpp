@@ -56,6 +56,7 @@ int main(){
 
 	cout << "Select is " << A.QSelect(3) << endl;
     // Select => 2	
+    cout << "FRONT: " << A.getFront() << endl;
 	
 	A.Sort();
     for (int i=0; i< A.length();i++) cout << A[i] << " ";  cout << endl;
