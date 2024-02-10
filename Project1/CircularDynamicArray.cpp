@@ -208,14 +208,14 @@ public:
     }
 
     int binSearch(T e){
-        normalize();
         int tempLeft = front;
         int tempRight = size - 1;
         while (tempLeft <= tempRight) {
             int mid = tempLeft + (tempRight - tempLeft) / 2;
-            if (array[mid] == e) {
+
+            if (array[(mid + front) % cap] == e) {
                 return mid;
-            } else if (array[mid] < e) {
+            } else if (array[(mid + front) % cap] < e) {
                 tempLeft = mid + 1;
             } else {
                 tempRight = mid - 1; 
