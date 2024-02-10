@@ -46,6 +46,27 @@ public:
         return *this;
     }
 
+    T& operator[](int index) {
+        if (index < size) {
+            int actualIndex = (front + index) % cap;
+            return array[actualIndex];
+        } else {
+            throw out_of_range("Index out of bounds");
+        }
+    }
+
+    int length() {
+        return size;
+    }
+
+    int capacity() {
+        return cap; 
+    }
+
+    int getFront(){
+        return front;
+    }
+
     void addEnd(int v) {
         if (size == cap) {
             resize(cap * 2);
@@ -83,16 +104,25 @@ public:
         }
     }
 
-    int length() {
-        return size;
+    void swapElements(int index1, int index2) {
+        if (index1 < size && index2 < size && index1 != index2) {
+            T temp = array[index1];
+            array[index1] = array[index2];
+            array[index2] = temp;
+        }
     }
 
-    int capacity() {
-        return cap; 
-    }
-
-    int getFront(){
-        return front;
+    void resize(int newCapacity) {
+        T* newArray = new T[newCapacity];
+    
+        for (int i = 0; i < size; i++) {
+            newArray[i] = array[(front + i) % cap];
+        }
+    
+        delete[] array;
+        array = newArray;
+        cap = newCapacity;
+        front = 0;
     }
 
     void clear() {
@@ -117,10 +147,10 @@ public:
 
     void Sort() {
         if (size > 1) {
-        normalize();
-        T* tempArray = new T[size];
-        mergeSort(tempArray, front, size - 1);
-        delete[] tempArray;
+            normalize();
+            T* tempArray = new T[size];
+            mergeSort(tempArray, front, size - 1);
+            delete[] tempArray;
         }
     }
 
@@ -169,8 +199,8 @@ public:
 
 
     int linearSearch(T e) {
-        for(int i = 0; i < size; i++){
-            if(array[i] == e){
+        for(int i = 0; i <= size; i++){
+            if(array[(front + i) % cap] == e){
                 return i;
             }
         }
@@ -178,7 +208,8 @@ public:
     }
 
     int binSearch(T e){
-        int tempLeft = 0;
+        normalize();
+        int tempLeft = front;
         int tempRight = size - 1;
         while (tempLeft <= tempRight) {
             int mid = tempLeft + (tempRight - tempLeft) / 2;
@@ -230,34 +261,5 @@ public:
         normalize();
         return kthSmallest(0, size - 1, k);
     }
-    void resize(int newCapacity) {
-        T* newArray = new T[newCapacity];
-    
-        for (int i = 0; i < size; i++) {
-            newArray[i] = array[(front + i) % cap];
-        }
-    
-        delete[] array;
-        array = newArray;
-        cap = newCapacity;
-        front = 0;
-    }
 
-
-    void swapElements(int index1, int index2) {
-        if (index1 < size && index2 < size && index1 != index2) {
-            T temp = array[index1];
-            array[index1] = array[index2];
-            array[index2] = temp;
-        }
-    }
-
-    T& operator[](int index) {
-        if (index < size) {
-            int actualIndex = (front + index) % cap;
-            return array[actualIndex];
-        } else {
-            throw out_of_range("Index out of bounds");
-        }
-    }
 };
