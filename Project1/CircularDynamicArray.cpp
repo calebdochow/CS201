@@ -32,7 +32,7 @@ public:
         }
     }
     
-    T& operator=(const CircularDynamicArray& other) { //Copy Assignment Contructor
+    CircularDynamicArray<T>& operator=(const CircularDynamicArray& other) { //Copy Assignment Contructor
         if (this != &other) {
             delete[] array;
             cap = other.cap;
@@ -261,40 +261,3 @@ public:
         }
     }
 };
-
-int main(int argc, char* argv[]) {
-    CircularDynamicArray<int> C(10);
-	for (int i=0; i< C.length();i++) C[i] = i;
-	for (int i=0; i< C.length();i++) cout << C[i] << " ";  cout << endl;
-	// C => "0 1 2 3 4 5 6 7 8 9"
-	C.delFront();
-	for (int i=0; i< C.length();i++) cout << C[i] << " ";  cout << endl;
-	// C => "1 2 3 4 5 6 7 8 9"
-	C.addFront(12);
-    C.addFront(19);
-    C.addEnd(20);
-    C.addEnd(13);
-
-    // C => "19 12 1 2 3 4 5 6 7 8 9 20 13"
-    for (int i=0; i< C.length();i++) cout << C[i] << " ";  cout << endl;
-    cout << "13 is found at: " << C.binSearch(13) << endl;
-    cout << "-----------------------"<<endl;
-    cout << "Capacity: " << C.capacity() << endl;
-    cout << "Size: " << C.length() << endl;
-    cout << "Front: " << C.getFront() << endl;
-    cout << "-----------------------"<<endl;
-    cout << endl << endl;
-    C.Sort();
-    for (int i=0; i< C.length();i++) cout << C[i] << " ";  cout << endl;
-    cout << "13 is found at: " << C.binSearch(13) << endl;
-    cout << "-----------------------"<<endl;
-    cout << "Capacity: " << C.capacity() << endl;
-    cout << "Size: " << C.length() << endl;
-    cout << "Front: " << C.getFront() << endl;
-    cout << "-----------------------"<<endl;
-
-    cout << "3rd smallest is: " << C.QSelect(3) << endl;
-
-
-    return 0;
-}
