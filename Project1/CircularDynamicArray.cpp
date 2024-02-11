@@ -224,45 +224,53 @@ public:
         return -1;
     }
 
-    int partition(int left, int right){
-        if(left >= right){
-            return left;
+    T Select(T qsArray[], int k, int qsSize) {
+        if (qsSize == 0 || k == 0) {
+            throw out_of_range("Out of Bounds");
         }
-        int pivotIndex = left + rand() % (right - left + 1);
-        T pivot = array[pivotIndex]; //pivot selected at random
-        int i = left - 1;
 
-        for(int j = left; j <= right; j++){
-            if(array[j] <= pivot){
-                i++;
-                swapElements(i, j);
+        size_t pivotIndex = rand() % qsSize;
+        T pivot = qsArray[pivotIndex];
+
+        T *L = new T[qsSize];
+        T *E = new T[qsSize];
+        T *G = new T[qsSize];
+
+        int lSize = 0, eSize = 0, gSize = 0;
+
+        for (int i = 0; i < qsSize; i++) {
+            if (qsArray[i] < pivot) {
+                L[lSize++] = qsArray[i];
+            } else if (qsArray[i] == pivot) {
+                E[eSize++] = qsArray[i];
+            } else {
+                G[gSize++] = qsArray[i];
             }
         }
-        swapElements(i + 1, pivotIndex);
-        return i + 1;
-    }
 
-    T kthSmallest(int left, int right, int k){
-        if(k > 0 && k <= right - left + 1){
-            int index = partition(left, right);
-
-            if(index - left == k - 1){
-                return array[index];
-
-            }else if(index - left >= k - 1){
-                return kthSmallest(left, index - 1, k); 
-
-            }else{
-                return kthSmallest(index + 1, right,  k - index + left - 1); 
-
-            }
+        if (k < lSize) {
+            T result = Select(L, k, lSize);
+            delete[] L;
+            delete[] E;
+            delete[] G;
+            return result;
+        } else if (k < lSize + eSize) {
+            delete[] L;
+            delete[] E;
+            delete[] G;
+            return pivot;
+        } else {
+            T result = Select(G, k - lSize - eSize, gSize);
+            delete[] L;
+            delete[] E;
+            delete[] G;
+            return result;
         }
-        return -1;
     }
 
     T QSelect(int k) {
-        normalize();
-        return kthSmallest(0, size - 1, k);
+        return Select(array, k, size);
     }
+
 
 };
