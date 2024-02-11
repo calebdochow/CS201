@@ -4,6 +4,7 @@ using namespace std;
 
 void foo(CircularDynamicArray<int> x) {
 	// x => "1 0 1 2 3 4 5 6 7 8 9 10 15 19 11"
+	cout << "Start: " << x[0] << endl;
 	for (int i=0; i<x.length()/2; i++)
 		x[i] = x[x.length()/2+i];
 	// x => "6 7 8 9 10 15 19 6 7 8 9 10 15 19 11"

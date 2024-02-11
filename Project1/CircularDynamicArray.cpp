@@ -48,12 +48,13 @@ public:
 
     T& operator[](int index) {
         if (index < size) {
-            int actualIndex = (front + index) % cap;
+            int actualIndex = (index + front) % cap;
             return array[actualIndex];
         } else {
             throw out_of_range("Index out of bounds");
         }
     }
+
 
     int length() {
         return size;
@@ -67,7 +68,7 @@ public:
         return front;
     }
 
-    void addEnd(int v) {
+    void addEnd(T v) {
         if (size == cap) {
             resize(cap * 2);
         }
@@ -75,7 +76,7 @@ public:
         size++;
     }
 
-    void addFront(int v) {
+    void addFront(T v) {
         if (size == cap) {
             resize(cap * 2);
         }
@@ -226,7 +227,7 @@ public:
 
     T Select(T qsArray[], int k, int qsSize) {
         if (qsSize == 0 || k == 0) {
-            throw out_of_range("Out of Bounds");
+            return -1;
         }
 
         size_t pivotIndex = rand() % qsSize;
