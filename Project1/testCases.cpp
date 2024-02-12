@@ -22,8 +22,7 @@ void foo(CircularDynamicArray<int> x) {
 int printWrapper = 0;
 
 int main(int argc, char **argv){
-	int testToRun = atoi(argv[1]);
-	switch (testToRun){
+	switch (1){
 		case 1:
 			test1(cout);
 			break;
