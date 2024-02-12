@@ -1,375 +1,72 @@
 #include <iostream>
 using namespace std;
+#include "CircularDynamicArray.cpp"
 
-template <typename elmtype>
-
-class CircularDynamicArray{
-
-    public:
-        int capacityVar;
-        int size;
-        int front;
-        int back;
-        elmtype *dynamicArray;
-        elmtype safe;
-
-        CircularDynamicArray();
-        CircularDynamicArray(int s);
-        ~CircularDynamicArray();
-        CircularDynamicArray(const CircularDynamicArray &old);
-        CircularDynamicArray& operator=(const CircularDynamicArray& rhs);
-        elmtype& operator[](int i);
-        void addEnd(elmtype v); 
-        void addFront(elmtype v);
-        void delEnd(); 
-        void delFront(); 
-        int length(); 
-        int capacity();
-        void clear();
-        elmtype QSelect(int k);
-        void Sort();
-        int linearSearch(elmtype e);
-        int binSearch(elmtype e);
-
-        void fixIndexes();
-        void merge(elmtype *array, int const left, int const mid,int const right);
-        void mergeSort(elmtype *array, int const begin, int const end);
-        elmtype select(elmtype *array, int k, int arraySize);
-        
-};
-
-//Default Constructor
-template <typename elmtype> CircularDynamicArray<elmtype>::CircularDynamicArray() {
-    dynamicArray = new elmtype[capacityVar = 2];
-    size = front = back = 0;
+void foo(CircularDynamicArray<int> x) {
+	// x => "1 0 1 2 3 4 5 6 7 8 9 10 15 19 11"
+	for (int i=0; i<x.length()/2; i++)
+		x[i] = x[x.length()/2+i];
+	// x => "6 7 8 9 10 15 19 6 7 8 9 10 15 19 11"
+	for (int i=0; i< x.length();i++) cout << x[i] << " ";  cout << endl;
 }
 
-//Constructor for capacity and size s
-template <typename elmtype> CircularDynamicArray<elmtype>::CircularDynamicArray(int s) {
-    dynamicArray = new elmtype[capacityVar = s];
-    size = s;
-    front = 0;
-    back = s - 1;
+int main(){
+	CircularDynamicArray<float> C(10);
+	for (int i=0; i< C.length();i++) C[i] = i;
+	for (int i=0; i< C.length();i++) cout << C[i] << " ";  cout << endl;
+	// C => "0 1 2 3 4 5 6 7 8 9"
+	C.delFront();
+	for (int i=0; i< C.length();i++) cout << C[i] << " ";  cout << endl;
+	// C => "1 2 3 4 5 6 7 8 9"
+	C.delEnd();
+	for (int i=0; i< C.length();i++) cout << C[i] << " ";  cout << endl;
+	// C => "1 2 3 4 5 6 7 8"
+	C.addEnd(100.0);
+	for (int i=0; i< C.length();i++) cout << C[i] << " ";  cout << endl;
+	// C => "1 2 3 4 5 6 7 8 100"
+	C.delFront();
+	C.addEnd(200.0);
+	// C => "2 3 4 5 6 7 8 100 200"	
+
+	C.addEnd(300.0);
+	C.addEnd(400.0);
+	// C => "2 3 4 5 6 7 8 100 200 300 400"	
+	
+	C.delEnd(); C.delFront();C.delEnd();
+	for (int i=0; i< C.length();i++) cout << C[i] << " ";  cout << endl;
+	// C => "3 4 5 6 7 8 100 200"	
+	
+
+
+	CircularDynamicArray<int> A,B;
+	for(int i=0; i<10;i++) A.addEnd(i);
+	B = A;
+	A.addEnd(15); A.addEnd(19);
+	// A => "0 1 2 3 4 5 6 7 8 9 15 19" 
+	cout << "Select is " << A.linearSearch(5) << endl;
+	// A => "0 1 2 3 4 5 6 7 8 9 15 19" Search => 5
+	cout << "Select is " << A.binSearch(12) << endl;
+	// A => "0 1 2 3 4 5 6 7 8 9 15 19" Search => -1
+	cout << "Select is " << A.binSearch(15) << endl;
+	// A => "0 1 2 3 4 5 6 7 8 9 15 19" Search => 10	
+	A.addFront(10); 
+	// A => "10 0 1 2 3 4 5 6 7 8 9 15 19"
+	cout << "Select is " << A.linearSearch(5) << endl;
+	// A => "10 0 1 2 3 4 5 6 7 8 9 15 19" Search => 6
+	cout << "Select is " << A.QSelect(3) << endl;
+    // Select => 2	
+	
+	A.Sort();
+	// A => "0 1 2 3 4 5 6 7 8 9 10 15 19"
+	A.addEnd(11); A.addFront(1); A.addFront(2); A.addFront(3);
+	cout << "capacity is " << A.capacity() << endl;
+	// A => "3 2 1 0 1 2 3 4 5 6 7 8 9 10 15 19 11"	  capacity => 32
+	A.delFront(); A.delFront();
+	// A => "1 0 1 2 3 4 5 6 7 8 9 10 15 19 11"	  capacity => 32
+
+	foo(A);
+	for (int i=0; i< A.length();i++) cout << A[i] << " ";  cout << endl;
+	// A => "1 0 1 2 3 4 5 6 7 8 9 10 15 19 11"
+	for (int i=0; i< B.length();i++) cout << B[i] << " ";  cout << endl;
+	// B => "0 1 2 3 4 5 6 7 8 9"
 }
-
-//Destructor
-template <typename elmtype> CircularDynamicArray<elmtype>::~CircularDynamicArray() {
-    delete[] dynamicArray;
-}
-
-//Copy Constructor
-template <typename elmtype> CircularDynamicArray<elmtype>::CircularDynamicArray(const CircularDynamicArray &old) {
-    capacityVar = old.capacityVar;
-    size = old.size;
-    front = old.front;
-    back = old.back;
-    for (int i = 0; i < size; i++) {
-            dynamicArray[i] = old.dynamicArray[(old.front + i) % old.capacityVar];
-        }
-}
-
-//Assignment Operator Overloarder
-template <typename elmtype> CircularDynamicArray<elmtype>& CircularDynamicArray<elmtype>::operator=(const CircularDynamicArray& rhs) {
-    if(this != &rhs){
-        delete[] dynamicArray;
-
-        capacityVar = rhs.capacityVar;
-        size = rhs.size;
-        front = rhs.front;
-        back = rhs.back;
-        dynamicArray = new elmtype[capacityVar];
-
-        for (size_t i = 0; i < size; i++){
-            dynamicArray[i] = rhs.dynamicArray[i];
-        }
-    }
-
-    return *this;    
-}
-
-template <typename elmtype> elmtype& CircularDynamicArray<elmtype>::operator[](int i) {
-    if (i > size - 1) {
-       cout << "i is out of bounds";  
-       return safe;
-    } 
-    else return dynamicArray[(i + front) % capacityVar];
-}
-
-template <typename elmtype> void CircularDynamicArray<elmtype>::addEnd(elmtype v) {
-    if (size == capacityVar) {
-        capacityVar *= 2;
-        elmtype *temp = new elmtype[capacityVar];
-
-        for (int i = 0, j = front; i < size; i++) {
-            temp[i] = dynamicArray[j];
-            j = (j + 1) % size;
-        }
-
-        front = 0;
-        back = size - 1;
-
-        delete[] dynamicArray;
-        dynamicArray = temp;
-    }
-
-    dynamicArray[(front + size) % capacityVar] = v;
-    size++;
-
-    return;
-}
-
-template <typename elmtype> void CircularDynamicArray<elmtype>::addFront(elmtype v) {
-    if (size == capacityVar) {
-        capacityVar *= 2;
-        elmtype *temp = new elmtype[capacityVar];   
-
-        for (int i = 0, j = front; i < size; i++) {
-            temp[i] = dynamicArray[j];
-            j = (j + 1) % size;
-        }
-
-        front = 0;
-        back = size - 1;
-
-        delete[] dynamicArray;
-        dynamicArray = temp;
-
-    }
-    
-    /*
-    if (size == 0) {
-
-    }
-    if (front == 0) {
-        front = (capacityVar - 1) % capacityVar;
-    } else {
-        front--;
-    }*/
-
-    front = (front - 1 + capacityVar) % capacityVar;
-    dynamicArray[front] = v;
-    size++;
-}
-
-template <typename elmtype> void CircularDynamicArray<elmtype>::delEnd() {
-    back = (back - 1 + capacityVar) % capacityVar;
-    size--;
-    
-    if (size == capacityVar / 4) {
-        capacityVar /= 2;
-        elmtype *temp = new elmtype[capacityVar];
-
-        for (int i = 0, j = front; i < size; i++) {
-            temp[i] = dynamicArray[j];
-            j = (j + 1) % size;
-        }
-
-        front = 0;
-        back = size - 1;
-
-        delete[] dynamicArray;
-        dynamicArray = temp;
-
-        delete[] temp;
-    }
-}
-
-template <typename elmtype> void CircularDynamicArray<elmtype>::delFront() {
-    front = (front + 1) % capacityVar;
-    size--;
-    
-    if (size == capacityVar / 4) {
-        capacityVar /= 2;
-        elmtype *temp = new elmtype[capacityVar];
-
-        for (int i = 0, j = front; i < size; i++) {
-            temp[i] = dynamicArray[j];
-            j = (j + 1) % size;
-        }
-
-        front = 0;
-        back = size - 1;
-
-        delete[] dynamicArray;
-        dynamicArray = temp;
-
-        delete[] temp;
-    }   
-}
-
-template <typename elmtype> int CircularDynamicArray<elmtype>::length() {
-    return size;
-}
-
-template <typename elmtype> int CircularDynamicArray<elmtype>::capacity() {
-    return capacityVar;
-}
-
-template <typename elmtype> void CircularDynamicArray<elmtype>::clear() {
-    delete[] dynamicArray;
-    dynamicArray = new elmtype[capacityVar = 2];
-    size = front = back = 0;
-}
-
-template <typename elmtype> elmtype CircularDynamicArray<elmtype>::QSelect(int k) {
-    fixIndexes();
-    return select(dynamicArray, k, size);
-}
-
-template <typename elmtype> void CircularDynamicArray<elmtype>::Sort() {
-    fixIndexes();
-    mergeSort(dynamicArray, 0, size - 1);
-}
-
-template <typename elmtype> int CircularDynamicArray<elmtype>::linearSearch(elmtype e) {
-    for (int i = 0, j = front; i < size; i++){
-        if (dynamicArray[j] == e) return i;
-        j = (j + 1) % capacityVar;
-    }
-
-    return -1;
-}
-
-template <typename elmtype> int CircularDynamicArray<elmtype>::binSearch(elmtype e) {
-    int left = 0;
-    int right = size - 1;
-
-    while (left <= right) {
-        int middle = left + (right - left) / 2;
-
-        // Check if x is present at mid
-        if (dynamicArray[(middle + front) % capacityVar] == e)
-            return middle;
-
-        // If x greater, ignore left half
-        if (dynamicArray[(middle + front) % capacityVar] < e)
-            left = middle + 1;
-
-        // If x is smaller, ignore right half
-        else
-            right = middle - 1;
-    }
-
-    // If we reach here, then element was not present
-    return -1;
-}
-
-template <typename elmtype> void CircularDynamicArray<elmtype>::fixIndexes(){
-    elmtype *temp = new elmtype[capacityVar];
-
-    for (int i = 0, j = front; i < size; i++) {
-        temp[i] = dynamicArray[j];
-        j = (j + 1) % capacityVar;
-    }
-
-    front = 0;
-    back = size - 1;
-
-    delete[] dynamicArray;
-    dynamicArray = temp;
-}
-
-// Merges two subarrays of array[].
-// First subarray is arr[begin..mid]
-// Second subarray is arr[mid+1..end]
-template <typename elmtype> void CircularDynamicArray<elmtype>::merge(elmtype *array, int const left, int const mid,int const right) {
-    int const subArrayOne = mid - left + 1;
-    int const subArrayTwo = right - mid;
- 
-    // Create temp arrays
-    auto *leftArray = new elmtype[subArrayOne],
-         *rightArray = new elmtype[subArrayTwo];
- 
-    // Copy data to temp arrays leftArray[] and rightArray[]
-    for (auto i = 0; i < subArrayOne; i++)
-        leftArray[i] = array[left + i];
-    for (auto j = 0; j < subArrayTwo; j++)
-        rightArray[j] = array[mid + 1 + j];
- 
-    auto indexOfSubArrayOne = 0, indexOfSubArrayTwo = 0;
-    int indexOfMergedArray = left;
- 
-    // Merge the temp arrays back into array[left..right]
-    while (indexOfSubArrayOne < subArrayOne
-           && indexOfSubArrayTwo < subArrayTwo) {
-        if (leftArray[indexOfSubArrayOne]
-            <= rightArray[indexOfSubArrayTwo]) {
-            array[indexOfMergedArray]
-                = leftArray[indexOfSubArrayOne];
-            indexOfSubArrayOne++;
-        }
-        else {
-            array[indexOfMergedArray]
-                = rightArray[indexOfSubArrayTwo];
-            indexOfSubArrayTwo++;
-        }
-        indexOfMergedArray++;
-    }
- 
-    // Copy the remaining elements of
-    // left[], if there are any
-    while (indexOfSubArrayOne < subArrayOne) {
-        array[indexOfMergedArray]
-            = leftArray[indexOfSubArrayOne];
-        indexOfSubArrayOne++;
-        indexOfMergedArray++;
-    }
- 
-    // Copy the remaining elements of
-    // right[], if there are any
-    while (indexOfSubArrayTwo < subArrayTwo) {
-        array[indexOfMergedArray]
-            = rightArray[indexOfSubArrayTwo];
-        indexOfSubArrayTwo++;
-        indexOfMergedArray++;
-    }
-    delete[] leftArray;
-    delete[] rightArray;
-}
- 
-// begin is for left index and end is right index
-// of the sub-array of arr to be sorted
-template <typename elmtype> void CircularDynamicArray<elmtype>::mergeSort(elmtype *array, int const begin, int const end) {
-    if (begin >= end)
-        return;
- 
-    int mid = begin + (end - begin) / 2;
-    mergeSort(array, begin, mid);
-    mergeSort(array, mid + 1, end);
-    merge(array, begin, mid, end);
-}
-
-
-template <typename elmtype> elmtype CircularDynamicArray<elmtype>::select(elmtype *array, int k, int arraySize) { 
-    
-    elmtype randomPivot = array[rand() % arraySize];
-    
-    elmtype *tempOne = new elmtype[arraySize];
-    int sizeOne = 0;
-
-    elmtype *tempTwo = new elmtype[arraySize];
-    int sizeTwo = 0;
-
-    elmtype *tempThree = new elmtype[arraySize];
-    int sizeThree = 0;
-
-    for (int i = 0; i < arraySize; i++) {
-        if (array[i] < randomPivot) {
-            tempOne[sizeOne] = array[i]; 
-            sizeOne++;
-        } 
-        else if (array[i] == randomPivot) {
-            tempTwo[sizeTwo] = array[i];
-            sizeTwo++;
-        }
-        else {
-            tempThree[sizeThree] = array[i];
-            sizeThree++;
-        }
-    }
-    
-    
-    if (k <= sizeOne) return select(tempOne, k, sizeOne);
-    else if (k <= sizeOne + sizeTwo) return randomPivot;
-    else return select(tempThree, k - sizeOne - sizeTwo, sizeThree);
-} 

@@ -2,7 +2,7 @@
 #include <fstream>
 #include <cstdlib>
 using namespace std;
-#include "CDA3.cpp"
+#include "CircularDynamicArray.cpp"
 
 void test1(ostream &fp);
 void test2(ostream &fp);
@@ -22,7 +22,7 @@ void foo(CircularDynamicArray<int> x) {
 int printWrapper = 0;
 
 int main(int argc, char **argv){
-	switch (6){
+	switch (1){
 		case 1:
 			test1(cout);
 			break;

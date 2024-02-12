@@ -50,7 +50,7 @@ public:
         return *this;
     }
 
-    T& operator[](int i) {
+    T& operator[](int i) { // [] Operator
         if (i < size) {
             int actualIndex = (i + front) % cap;
             return array[actualIndex];
@@ -61,19 +61,19 @@ public:
     }
 
 
-    int length() {
+    int length() { //gets size of array; O(1)
         return size;
     }
 
-    int capacity() {
+    int capacity() { //gets capacity of array; O(1)
         return cap; 
     }
 
-    int getFront(){
+    int getFront(){ //gets front index of array; O(1)
         return front;
     }
 
-    void addEnd(T v) {
+    void addEnd(T v) { //adds element of type T to end of array; O(1) amortized
         if (size == cap) {
             resize(cap * 2);
         }
@@ -81,7 +81,7 @@ public:
         size++;
     }
 
-    void addFront(T v) {
+    void addFront(T v) { //adds element of type T to front of array; O(1) amortized
         if (size == cap) {
             resize(cap * 2);
         }
@@ -90,7 +90,7 @@ public:
         size++;
     }
 
-    void delEnd() {
+    void delEnd() { //removes element from end of array; O(1) amortized
         if (size > 0) {
             int indexToRemove = (front + size - 1) % cap;
             swapElements(indexToRemove, cap - 1);
@@ -102,7 +102,7 @@ public:
         }
     }
 
-    void delFront() {
+    void delFront() { //removes element from front of array; O(1) amortized
         if (size > 0) {
             front = (front + 1) % cap;
             size--;
@@ -113,7 +113,7 @@ public:
         }
     }
 
-    void swapElements(int index1, int index2) {
+    void swapElements(int index1, int index2) { //swaps index of two elements. Used in delEnd to maintain amortized O(1)
         if (index1 < size && index2 < size && index1 != index2) {
             T temp = array[index1];
             array[index1] = array[index2];
@@ -121,7 +121,7 @@ public:
         }
     }
 
-    void resize(int newCapacity) {
+    void resize(int newCapacity) { //resizes array with new capacity; O(n) n = size
         T* newArray = new T[newCapacity];
     
         for(int i = 0, j = front; i < size; i++){
@@ -135,7 +135,7 @@ public:
         front = 0;
     }
 
-    void clear() {
+    void clear() { //Clears array O(1)
         delete[] array;
         cap = 2;
         size = 0;
@@ -143,135 +143,130 @@ public:
         array = new T[cap];
     }
 
-    void normalize(){
+    void normalize(){ //fixes the indexes of the array, sets front to index[0]; O(n) n = size
         T *normalizedArray = new T[cap];
+
         for(int i = 0, j = front; i < size; i++){
             normalizedArray[i] = array[j];
             j = (j + 1) % cap;
         }
-        
+
         front = 0;
         delete[] array;
         array = normalizedArray;
     }
 
-    void Sort() {
+    void Sort() { //Uses the mergesort algorithm; O(nLogn) n = size
         normalize();
         mergeSort(array, 0, size - 1);
     }
 
-    void merge(T *mArray, int const left, int const mid,int const right) {
-        int const subArrayOne = mid - left + 1;
-        int const subArrayTwo = right - mid;
+    void merge(T *mArray, int const left, int const mid, int const right) { //Merge portion of mergesort, merges two arrays together for final result
+        int const temp1 = mid - left + 1;
+        int const temp2 = right - mid;
     
-        // Create temp arrays
-        auto *leftArray = new T[subArrayOne],
-            *rightArray = new T[subArrayTwo];
+        //Creates two temp arrays
+        T *leftArray = new T[temp1];
+        T *rightArray = new T[temp2];
     
-        // Copy data to temp arrays leftArray[] and rightArray[]
-        for (auto i = 0; i < subArrayOne; i++)
+        // Copy data to arrays
+        for (int i = 0; i < temp1; i++){
             leftArray[i] = mArray[left + i];
-        for (auto j = 0; j < subArrayTwo; j++)
+        }
+        for (int j = 0; j < temp2; j++){
             rightArray[j] = mArray[mid + 1 + j];
+        }
+        int indexOftemp1 = 0;
+        int indexOftemp2 = 0;
+        int mergedIndex = left;
     
-        auto indexOfSubArrayOne = 0, indexOfSubArrayTwo = 0;
-        int indexOfMergedArray = left;
-    
-        // Merge the temp arrays back into array[left..right]
-        while (indexOfSubArrayOne < subArrayOne
-            && indexOfSubArrayTwo < subArrayTwo) {
-            if (leftArray[indexOfSubArrayOne]
-                <= rightArray[indexOfSubArrayTwo]) {
-                mArray[indexOfMergedArray]
-                    = leftArray[indexOfSubArrayOne];
-                indexOfSubArrayOne++;
+        // Merge the temp arrays together back into array
+        while (indexOftemp1 < temp1 && indexOftemp2 < temp2) {
+            if (leftArray[indexOftemp1] <= rightArray[indexOftemp2]) {
+                mArray[mergedIndex] = leftArray[indexOftemp1];
+                indexOftemp1++;
             }
             else {
-                mArray[indexOfMergedArray]
-                    = rightArray[indexOfSubArrayTwo];
-                indexOfSubArrayTwo++;
+                mArray[mergedIndex] = rightArray[indexOftemp2];
+                indexOftemp2++;
             }
-            indexOfMergedArray++;
+            mergedIndex++;
         }
     
-        // Copy the remaining elements of
-        // left[], if there are any
-        while (indexOfSubArrayOne < subArrayOne) {
-            mArray[indexOfMergedArray]
-                = leftArray[indexOfSubArrayOne];
-            indexOfSubArrayOne++;
-            indexOfMergedArray++;
+        // Copy the remaining elements of left
+        while (indexOftemp1 < temp1) {
+            mArray[mergedIndex] = leftArray[indexOftemp1];
+            indexOftemp1++;
+            mergedIndex++;
         }
     
-        // Copy the remaining elements of
-        // right[], if there are any
-        while (indexOfSubArrayTwo < subArrayTwo) {
-            mArray[indexOfMergedArray]
-                = rightArray[indexOfSubArrayTwo];
-            indexOfSubArrayTwo++;
-            indexOfMergedArray++;
+        // Copy the remaining elements of right
+        while (indexOftemp2 < temp2) {
+            mArray[mergedIndex] = rightArray[indexOftemp2];
+            indexOftemp2++;
+            mergedIndex++;
         }
+        //frees memory
         delete[] leftArray;
         delete[] rightArray;
     }
  
-// begin is for left index and end is right index
-// of the sub-array of arr to be sorted
-    void mergeSort(T *mArray, int const begin, int const end) {
-        if (begin >= end)
-            return;
     
-        int mid = begin + (end - begin) / 2;
-        mergeSort(mArray, begin, mid);
-        mergeSort(mArray, mid + 1, end);
-        merge(mArray, begin, mid, end);
+    void mergeSort(T *mArray, int const left, int const right) { //array, (left, right) / (front, back)
+        if (left >= right){return;}
+
+        int mid = left + (right - left) / 2;
+
+        mergeSort(mArray, left, mid);
+        mergeSort(mArray, mid + 1, right);
+        merge(mArray, left, mid, right);
     }
 
 
-    int linearSearch(T e) {
+    int linearSearch(T e) { //linear search looking for item e; O(n) n = size
         for(int i = 0; i <= size; i++){
             if(array[(front + i) % cap] == e){
-                return i;
+                return i; //returns elements index
             }
         }
         return -1;
     }
 
-    int binSearch(T e){
-        int tempLeft = front;
+    int binSearch(T e){ //binary search looking for item e; O(log n) n = size
+        int tempLeft = 0;
         int tempRight = size - 1;
         while (tempLeft <= tempRight) {
             int mid = tempLeft + (tempRight - tempLeft) / 2;
 
             if (array[(mid + front) % cap] == e) {
-                return mid;
+                return mid; //Returns index of item
             } else if (array[(mid + front) % cap] < e) {
                 tempLeft = mid + 1;
             } else {
                 tempRight = mid - 1; 
             }
         }
-        return -1;
+        return -1; //item not in list
     }
 
-    T Select(T *qsArray, int k, int qsSize) {
+    T Select(T *qsArray, int k, int qsSize) { //recursive select function used for QSelect method
       
-        T pivot = qsArray[rand() % qsSize];
+        T pivot = qsArray[rand() % qsSize]; //random pivot
 
         T *L = new T[qsSize];
         T *E = new T[qsSize];
         T *G = new T[qsSize];
 
-        int lSize = 0, eSize = 0, gSize = 0;
+        int lSize = 0, eSize = 0, gSize = 0; //track size of three new arrays
        
         for (int i = 0; i < qsSize; i++) {
-            if (qsArray[i] < pivot) {
+            if (qsArray[i] < pivot) { //less than pivot, add to L
                 L[lSize] = qsArray[i];
                 lSize++;
-            } else if (qsArray[i] == pivot) {
+            } else if (qsArray[i] == pivot) { //equal than pivot, add to E
                 E[eSize] = qsArray[i];
                 eSize++;
-            } else {
+            } else { //greater than pivot, add to G
                 G[gSize] = qsArray[i];
                 gSize++;
             }
@@ -286,7 +281,7 @@ public:
         }
     }
 
-    T QSelect(int k) {
+    T QSelect(int k) {//finds and returns kth smallest element; O(n) n = size
         normalize();
         return Select(array, k, size);
     }
