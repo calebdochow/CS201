@@ -25,9 +25,12 @@ public:
         delete[] array;
     }
 
-    CircularDynamicArray(const CircularDynamicArray& other) : cap(other.cap), size(other.size), front(other.front) { //Copy Constructor
+    CircularDynamicArray(const CircularDynamicArray& other){ //Copy Constructor
+        cap = other.cap;
+        size = other.size;
+        front = 0;
         array = new T[cap];
-        for (int i = 0; i < size; ++i) {
+        for (int i = 0; i < size; i++) {
             array[i] = other.array[(other.front + i) % other.cap];
         }
     }
@@ -39,16 +42,16 @@ public:
             size = other.size;
             front = other.front;
             array = new T[cap];
-            for (int i = 0; i < size; ++i) {
-                array[i] = other.array[(other.front + i) % other.cap];
+            for (int i = 0; i < size; i++) {
+                array[i] = other.array[i];
             }
         }
         return *this;
     }
 
-    T& operator[](int index) {
-        if (index < size) {
-            int actualIndex = (index + front) % cap;
+    T& operator[](int i) {
+        if (i < size) {
+            int actualIndex = (i + front) % cap;
             return array[actualIndex];
         } else {
             throw out_of_range("Index out of bounds");
@@ -90,7 +93,6 @@ public:
             int indexToRemove = (front + size - 1) % cap;
             swapElements(indexToRemove, cap - 1);
             size--;
-            swapElements(indexToRemove, cap - 1);
 
             if (size <= cap / 4 && cap / 2 >= 2) {
                 resize(cap / 2);
@@ -102,6 +104,10 @@ public:
         if (size > 0) {
             front = (front + 1) % cap;
             size--;
+
+            if (size <= cap / 4 && cap / 2 >= 2) {
+                resize(cap / 2);
+            }
         }
     }
 
@@ -116,8 +122,9 @@ public:
     void resize(int newCapacity) {
         T* newArray = new T[newCapacity];
     
-        for (int i = 0; i < size; i++) {
-            newArray[i] = array[(front + i) % cap];
+        for(int i = 0, j = front; i < size; i++){
+            newArray[i] = array[j];
+            j = (j + 1) % cap;
         }
     
         delete[] array;
@@ -135,15 +142,15 @@ public:
     }
 
     void normalize(){
-        T* normalizedArray = new T[size];
-        for(int i = 0; i < size; i++){
-            normalizedArray[i] = array[(front + i) % cap];
+        T *normalizedArray = new T[cap];
+        for(int i = 0, j = front; i < size; i++){
+            normalizedArray[i] = array[j];
+            j = (j + 1) % cap;
         }
-        for (int i = 0; i < size; i++) {
-            array[i] = normalizedArray[i];
-        }
+        
         front = 0;
-        delete[] normalizedArray;
+        delete[] array;
+        array = normalizedArray;
     }
 
     void Sort() {

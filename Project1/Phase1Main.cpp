@@ -64,7 +64,7 @@ int main(){
 	// A => "3 2 1 0 1 2 3 4 5 6 7 8 9 10 15 19 11"	  capacity => 32
 	A.delFront(); A.delFront();
 	// A => "1 0 1 2 3 4 5 6 7 8 9 10 15 19 11"	  capacity => 32
-
+	cout << "Front: " << A.getFront() <<endl;
 	foo(A);
 	for (int i=0; i< A.length();i++) cout << A[i] << " ";  cout << endl;
 	// A => "1 0 1 2 3 4 5 6 7 8 9 10 15 19 11"
