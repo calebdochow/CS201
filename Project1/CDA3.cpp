@@ -63,9 +63,14 @@ template <typename elmtype> CircularDynamicArray<elmtype>::CircularDynamicArray(
     size = old.size;
     front = old.front;
     back = old.back;
-    for (int i = 0; i < size; i++) {
-            dynamicArray[i] = old.dynamicArray[(old.front + i) % old.capacityVar];
-        }
+    dynamicArray = new elmtype[capacityVar];
+
+    for (int i = 0; i < size; i++)
+    {
+        dynamicArray[i] = old.dynamicArray[(old.front + i) % capacityVar];
+    }
+ 
+    front = 0;
 }
 
 //Assignment Operator Overloarder
@@ -79,8 +84,8 @@ template <typename elmtype> CircularDynamicArray<elmtype>& CircularDynamicArray<
         back = rhs.back;
         dynamicArray = new elmtype[capacityVar];
 
-        for (size_t i = 0; i < size; i++){
-            dynamicArray[i] = rhs.dynamicArray[i];
+        for (int i = 0; i < size; i++){
+            dynamicArray[i] = rhs.dynamicArray[(i + rhs.front) % rhs.capacityVar];
         }
     }
 
@@ -112,7 +117,14 @@ template <typename elmtype> void CircularDynamicArray<elmtype>::addEnd(elmtype v
         dynamicArray = temp;
     }
 
-    dynamicArray[(front + size) % capacityVar] = v;
+    if (size == 0) {
+        dynamicArray[back] = v;
+    }
+    else {
+        back = (back + 1) % capacityVar;
+        dynamicArray[back] = v;    
+    }
+
     size++;
 
     return;
@@ -133,7 +145,6 @@ template <typename elmtype> void CircularDynamicArray<elmtype>::addFront(elmtype
 
         delete[] dynamicArray;
         dynamicArray = temp;
-
     }
     
     /*
@@ -169,8 +180,6 @@ template <typename elmtype> void CircularDynamicArray<elmtype>::delEnd() {
 
         delete[] dynamicArray;
         dynamicArray = temp;
-
-        delete[] temp;
     }
 }
 
@@ -192,8 +201,6 @@ template <typename elmtype> void CircularDynamicArray<elmtype>::delFront() {
 
         delete[] dynamicArray;
         dynamicArray = temp;
-
-        delete[] temp;
     }   
 }
 
@@ -237,20 +244,16 @@ template <typename elmtype> int CircularDynamicArray<elmtype>::binSearch(elmtype
     while (left <= right) {
         int middle = left + (right - left) / 2;
 
-        // Check if x is present at mid
         if (dynamicArray[(middle + front) % capacityVar] == e)
             return middle;
 
-        // If x greater, ignore left half
         if (dynamicArray[(middle + front) % capacityVar] < e)
             left = middle + 1;
 
-        // If x is smaller, ignore right half
         else
             right = middle - 1;
     }
 
-    // If we reach here, then element was not present
     return -1;
 }
 
@@ -269,18 +272,13 @@ template <typename elmtype> void CircularDynamicArray<elmtype>::fixIndexes(){
     dynamicArray = temp;
 }
 
-// Merges two subarrays of array[].
-// First subarray is arr[begin..mid]
-// Second subarray is arr[mid+1..end]
 template <typename elmtype> void CircularDynamicArray<elmtype>::merge(elmtype *array, int const left, int const mid,int const right) {
     int const subArrayOne = mid - left + 1;
     int const subArrayTwo = right - mid;
  
-    // Create temp arrays
     auto *leftArray = new elmtype[subArrayOne],
          *rightArray = new elmtype[subArrayTwo];
  
-    // Copy data to temp arrays leftArray[] and rightArray[]
     for (auto i = 0; i < subArrayOne; i++)
         leftArray[i] = array[left + i];
     for (auto j = 0; j < subArrayTwo; j++)
@@ -289,7 +287,6 @@ template <typename elmtype> void CircularDynamicArray<elmtype>::merge(elmtype *a
     auto indexOfSubArrayOne = 0, indexOfSubArrayTwo = 0;
     int indexOfMergedArray = left;
  
-    // Merge the temp arrays back into array[left..right]
     while (indexOfSubArrayOne < subArrayOne
            && indexOfSubArrayTwo < subArrayTwo) {
         if (leftArray[indexOfSubArrayOne]
@@ -306,8 +303,6 @@ template <typename elmtype> void CircularDynamicArray<elmtype>::merge(elmtype *a
         indexOfMergedArray++;
     }
  
-    // Copy the remaining elements of
-    // left[], if there are any
     while (indexOfSubArrayOne < subArrayOne) {
         array[indexOfMergedArray]
             = leftArray[indexOfSubArrayOne];
@@ -315,8 +310,6 @@ template <typename elmtype> void CircularDynamicArray<elmtype>::merge(elmtype *a
         indexOfMergedArray++;
     }
  
-    // Copy the remaining elements of
-    // right[], if there are any
     while (indexOfSubArrayTwo < subArrayTwo) {
         array[indexOfMergedArray]
             = rightArray[indexOfSubArrayTwo];
@@ -327,8 +320,6 @@ template <typename elmtype> void CircularDynamicArray<elmtype>::merge(elmtype *a
     delete[] rightArray;
 }
  
-// begin is for left index and end is right index
-// of the sub-array of arr to be sorted
 template <typename elmtype> void CircularDynamicArray<elmtype>::mergeSort(elmtype *array, int const begin, int const end) {
     if (begin >= end)
         return;
@@ -341,9 +332,10 @@ template <typename elmtype> void CircularDynamicArray<elmtype>::mergeSort(elmtyp
 
 
 template <typename elmtype> elmtype CircularDynamicArray<elmtype>::select(elmtype *array, int k, int arraySize) { 
-    
-    elmtype randomPivot = array[rand() % arraySize];
-    
+
+
+    elmtype randomPivot = array[(rand() % arraySize)];
+
     elmtype *tempOne = new elmtype[arraySize];
     int sizeOne = 0;
 
@@ -352,6 +344,7 @@ template <typename elmtype> elmtype CircularDynamicArray<elmtype>::select(elmtyp
 
     elmtype *tempThree = new elmtype[arraySize];
     int sizeThree = 0;
+
 
     for (int i = 0; i < arraySize; i++) {
         if (array[i] < randomPivot) {
@@ -367,7 +360,7 @@ template <typename elmtype> elmtype CircularDynamicArray<elmtype>::select(elmtyp
             sizeThree++;
         }
     }
-    
+
     
     if (k <= sizeOne) return select(tempOne, k, sizeOne);
     else if (k <= sizeOne + sizeTwo) return randomPivot;

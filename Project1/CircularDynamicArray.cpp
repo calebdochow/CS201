@@ -44,7 +44,7 @@ public:
             front = other.front;
             array = new T[cap];
             for (int i = 0; i < size; i++) {
-                array[i] = other.array[i];
+                array[i] = other.array[(i + other.front) % other.cap];
             }
         }
         return *this;
@@ -156,55 +156,75 @@ public:
     }
 
     void Sort() {
-        if (size > 1) {
-            normalize();
-            T* tempArray = new T[size];
-            mergeSort(tempArray, front, size - 1);
-            delete[] tempArray;
-        }
+        normalize();
+        mergeSort(array, 0, size - 1);
     }
 
-    void mergeSort(T* tempArray, int left, int right) {
-        if(left < right){
-            int middle = (left + right) / 2;
-            mergeSort(tempArray, left, middle);
-            mergeSort(tempArray, middle + 1, right);
-            merge(tempArray, left, middle, right);
-        } 
-    }
-
-    void merge(T* tempArray, int left, int middle, int right) {
-        int i = left;
-        int j = middle + 1;
-        int k = left;
-
-        while(i <= middle && j <= right){
-            if(array[i] <= array[j]){
-                tempArray[k] = array[i];
-                i++;
-                k++;
-            }else{
-                tempArray[k] = array[j];
-                j++;
-                k++;
+    void merge(T *mArray, int const left, int const mid,int const right) {
+        int const subArrayOne = mid - left + 1;
+        int const subArrayTwo = right - mid;
+    
+        // Create temp arrays
+        auto *leftArray = new T[subArrayOne],
+            *rightArray = new T[subArrayTwo];
+    
+        // Copy data to temp arrays leftArray[] and rightArray[]
+        for (auto i = 0; i < subArrayOne; i++)
+            leftArray[i] = mArray[left + i];
+        for (auto j = 0; j < subArrayTwo; j++)
+            rightArray[j] = mArray[mid + 1 + j];
+    
+        auto indexOfSubArrayOne = 0, indexOfSubArrayTwo = 0;
+        int indexOfMergedArray = left;
+    
+        // Merge the temp arrays back into array[left..right]
+        while (indexOfSubArrayOne < subArrayOne
+            && indexOfSubArrayTwo < subArrayTwo) {
+            if (leftArray[indexOfSubArrayOne]
+                <= rightArray[indexOfSubArrayTwo]) {
+                mArray[indexOfMergedArray]
+                    = leftArray[indexOfSubArrayOne];
+                indexOfSubArrayOne++;
             }
+            else {
+                mArray[indexOfMergedArray]
+                    = rightArray[indexOfSubArrayTwo];
+                indexOfSubArrayTwo++;
+            }
+            indexOfMergedArray++;
         }
-
-        while(i <= middle){
-            tempArray[k] = array[i];
-            i++;
-            k++;
+    
+        // Copy the remaining elements of
+        // left[], if there are any
+        while (indexOfSubArrayOne < subArrayOne) {
+            mArray[indexOfMergedArray]
+                = leftArray[indexOfSubArrayOne];
+            indexOfSubArrayOne++;
+            indexOfMergedArray++;
         }
-
-        while(j <= right){
-            tempArray[k] = array[j];
-            j++;
-            k++;
+    
+        // Copy the remaining elements of
+        // right[], if there are any
+        while (indexOfSubArrayTwo < subArrayTwo) {
+            mArray[indexOfMergedArray]
+                = rightArray[indexOfSubArrayTwo];
+            indexOfSubArrayTwo++;
+            indexOfMergedArray++;
         }
-
-        for(int s = 0; s <= right; s++){
-            array[s] = tempArray[s];
-        }
+        delete[] leftArray;
+        delete[] rightArray;
+    }
+ 
+// begin is for left index and end is right index
+// of the sub-array of arr to be sorted
+    void mergeSort(T *mArray, int const begin, int const end) {
+        if (begin >= end)
+            return;
+    
+        int mid = begin + (end - begin) / 2;
+        mergeSort(mArray, begin, mid);
+        mergeSort(mArray, mid + 1, end);
+        merge(mArray, begin, mid, end);
     }
 
 
@@ -234,51 +254,40 @@ public:
         return -1;
     }
 
-    T Select(T qsArray[], int k, int qsSize) {
-        if (qsSize == 0 || k == 0) {
-            return -1;
-        }
-
-        size_t pivotIndex = rand() % qsSize;
-        T pivot = qsArray[pivotIndex];
+    T Select(T *qsArray, int k, int qsSize) {
+      
+        T pivot = qsArray[rand() % qsSize];
 
         T *L = new T[qsSize];
         T *E = new T[qsSize];
         T *G = new T[qsSize];
 
         int lSize = 0, eSize = 0, gSize = 0;
-
+       
         for (int i = 0; i < qsSize; i++) {
             if (qsArray[i] < pivot) {
-                L[lSize++] = qsArray[i];
+                L[lSize] = qsArray[i];
+                lSize++;
             } else if (qsArray[i] == pivot) {
-                E[eSize++] = qsArray[i];
+                E[eSize] = qsArray[i];
+                eSize++;
             } else {
-                G[gSize++] = qsArray[i];
+                G[gSize] = qsArray[i];
+                gSize++;
             }
         }
 
-        if (k < lSize) {
-            T result = Select(L, k, lSize);
-            delete[] L;
-            delete[] E;
-            delete[] G;
-            return result;
-        } else if (k < lSize + eSize) {
-            delete[] L;
-            delete[] E;
-            delete[] G;
+        if (k <= lSize) {
+            return Select(L, k, lSize);
+        } else if (k <= lSize + eSize) {
             return pivot;
         } else {
-            T result = Select(G, k - lSize - eSize, gSize);
-            delete[] L;
-            delete[] E;
-            delete[] G;
-            return result;
+            return Select(G, k - lSize - eSize, gSize);
         }
     }
 
     T QSelect(int k) {
+        normalize();
         return Select(array, k, size);
     }
 
