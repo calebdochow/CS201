@@ -11,6 +11,7 @@ private:
     int cap;
     int size;
     int front;
+    T safe;
 
 public:
     CircularDynamicArray() : cap(2), size(0), front(0) { //Default Constructor
@@ -54,7 +55,8 @@ public:
             int actualIndex = (i + front) % cap;
             return array[actualIndex];
         } else {
-            throw out_of_range("Index out of bounds");
+            cout << "Index out of bounds" << endl;
+            return safe;
         }
     }
 
