@@ -1,129 +1,164 @@
 #include <iostream>
-#include <algorithm>
-#include <vector>
+#include "CircularDynamicArray.cpp"
 using namespace std;
 
-template<typename KeyType, typename ValueType>
-class Node {
-public:
-    vector<KeyType> keys;
-    vector<ValueType> values;
-    vector<Node*> children;
-    Node* parent;
+template <typename K, typename V>
+class Element {
 
-    Node(){
-        
-    }
-    // Constructor
-    Node(KeyType key, ValueType value, Node* parent = nullptr) {
-        keys.push_back(key);
-        values.push_back(value);
-        this->parent = parent;
-    }
+    public:
+        K key;
+        CircularDynamicArray<V> values;
+        bool isEmpty = true;
 
-    // Insert key-value pair into the node
-    void insert(KeyType key, ValueType value) {
-        keys.push_back(key);
-        values.push_back(value);
-        sort(keys.begin(), keys.end());
-    }
-
-    // Check if node is full
-    bool isFull() {
-        return keys.size() == 3;
-    }
-
-    // Split the node
-    Node* split() {
-        Node* new_node = new Node(keys[2], values[2], parent);
-        
-        // Check if the current node is a leaf
-        if (!isLeaf()) {
-            new_node->children.push_back(children[2]);
-            new_node->children.push_back(children[3]);
-
-            if (children[2])
-                children[2]->parent = new_node;
-            if (children[3])
-                children[3]->parent = new_node;
-
-            children.erase(children.begin() + 2, children.end());
-        }
-        
-        keys.pop_back();
-        keys.pop_back();
-        values.pop_back();
-        values.pop_back();
-        return new_node;
-    }
-
-    // Check if the node is a leaf
-    bool isLeaf() {
-        return children.empty();
-    }
-
-    // Find the appropriate child for the given key
-    // Find the appropriate child for the given key
-    Node* getChild(KeyType key) {
-        int num_keys = keys.size();
-        int index = 0;
-        while (index < num_keys && key > keys[index]) {
-            index++;
+        Element() {
+            isEmpty = true;
         }
 
-        if (isLeaf() || index >= children.size()) {
-            return nullptr;
+        void setKey(K k, V value) {
+            isEmpty = false;
+            key = k;
+            values.addEnd(value);
         }
-        return children[index];
-    }
 
+        void addValue (V value) {
+            values.addEnd(value);
+        }
 
 };
 
-template<typename KeyType, typename ValueType>
-class Two4Tree {
-public:
-    Node<KeyType, ValueType>* root;
+template <typename key, typename value>
+class Node {
 
-    // Constructor
-    Two4Tree(KeyType keys[], ValueType values[], int size) {
-        root = nullptr;
-        for (int i = 0; i < size; ++i) {
-            insert(keys[i], values[i]);
+    public:
+        CircularDynamicArray<Element<key, value>> elements;
+        //Element<key, value> elements = [];
+
+        Node* left;
+        Node* middeLeft;
+        Node* middleRight;
+        Node* right;
+        Node* parent;
+
+        bool leaf;
+        int size;
+
+        Node() {
+            left = nullptr;
+            middeLeft = nullptr;
+            middleRight = nullptr;
+            right = nullptr;
+            size = 0;
         }
-    }
 
-    // Insert a key-value pair into the tree
-    void insert(KeyType key, ValueType value) {
-        if (!root) {
-            root = new Node<KeyType, ValueType>(key, value);
-            return;
+        Node() {
+
+        }
+};
+
+template <typename keytype, typename valuetype>
+
+class two4Tree {
+        
+    public:
+
+        Node<keytype, valuetype> *root; 
+        int size;
+        
+        two4Tree() {
+            root = new Node<keytype, valuetype>();
+            int size = 0;
+        }
+        two4Tree(keytype k[], valuetype V[], int s) {
+            
+        }
+        ~two4Tree() {
+
         }
 
-        Node<KeyType, ValueType>* current = root;
-        while (!current->isLeaf()) {
-            current = current->getChild(key);
+        valuetype * search(keytype k) { //merge down
+
         }
 
-        current->insert(key, value);
-        while (current->isFull()) {
-            if (current == root) {
-                root = new Node<KeyType, ValueType>(current->keys[1], current->values[1]);
-                root->children.push_back(current);
-                root->children.push_back(current->split());
-                current->parent = root;
-                root->children[1]->parent = root;
-                return;
+        void insert(keytype k, valuetype v) { //implement counter
+
+            Node<keytype, valuetype> *r = root;
+
+            if (r->elements.size() == 3) {
+                Node<keytype, valuetype> s = new Node<keytype, valuetype>;
+                root = s;
+                s.leaf = false;
+                s.size = 0;
+                s.left = r;
+                split(s, 1);
+                insertNonefull(s, k, v)
             } else {
-                Node<KeyType, ValueType>* parent = current->parent;
-                parent->insert(current->keys[1], current->values[1]);
-                int index = find(parent->keys.begin(), parent->keys.end(), current->keys[1]) - parent->keys.begin();
-                parent->children.insert(parent->children.begin() + index + 1, current->split());
-                current = parent;
+                insertNonefull(root, k, v);
             }
         }
-    }
 
+        void insertNonefull(Node<keytype, valuetype> *node, keytype k, valuetype v) {
 
+            int i = node->elements.size();
+
+            if ()
+        }
+
+        void split(Node<keytype, valuetype> *node, int i) {
+            Node<keytype, valuetype> *z = new Node<keytype, valuetype>;
+            Node<keytype, valuetype> *y;
+
+            if (i == 0){
+                y = node->left;
+            } else if (i == 1) {
+                y = node->middeLeft;
+            } else if (i == 2) {
+                y = node->middleRight;
+            } else if (i == 3) {
+                y = node->right;
+            }
+
+            z->leaf = y->leaf;
+
+            z->size = 1;
+
+            for (int i = 0, i < 0; i++){
+
+            }
+
+            if (!y->leaf) {
+                for (int i = 0, )
+            }
+        }
+
+        int remove(keytype k) {
+
+        }
+
+        int rank(keytype k) { //return leftmost rank for duplicates
+
+        }
+
+        keytype select(int pos) {
+
+        }
+
+        int duplicates(keytype k) {
+
+        }
+
+        int size() {
+
+        }
+
+        void preorder() {
+
+        }
+
+        void inorder() {
+
+        }
+
+        void postorder() {
+
+        }
 };
-
