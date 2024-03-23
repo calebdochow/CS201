@@ -4,7 +4,6 @@ using namespace std;
 
 template <typename K, typename V>
 class Element {
-
     public:
         K key;
         CircularDynamicArray<V> values;
@@ -28,71 +27,84 @@ class Element {
 
 template <typename key, typename value>
 class Node {
-
     public:
-        CircularDynamicArray<Element<key, value>> elements;
-        //Element<key, value> elements = [];
+        CircularDynamicArray<Element<key, value>> elements; //DATA
 
-        Node* left;
-        Node* middeLeft;
-        Node* middleRight;
-        Node* right;
+        Node* children[4];
         Node* parent;
 
-        bool leaf;
-        int size;
+        bool leaf; 
 
-        Node() {
-            left = nullptr;
-            middeLeft = nullptr;
-            middleRight = nullptr;
-            right = nullptr;
-            size = 0;
-        }
-
-        Node() {
-
+        Node() { //Constructor
+            children[0] = nullptr;
+            children[1] = nullptr;
+            children[2] = nullptr;
+            children[3] = nullptr;
         }
 };
 
 template <typename keytype, typename valuetype>
-
 class two4Tree {
-        
     public:
 
         Node<keytype, valuetype> *root; 
-        int size;
         
         two4Tree() {
             root = new Node<keytype, valuetype>();
-            int size = 0;
         }
-        two4Tree(keytype k[], valuetype V[], int s) {
-            
-        }
-        ~two4Tree() {
 
+        two4Tree(keytype k[], valuetype V[], int s) {
+            root = new Node<keytype, valuetype>();
+
+            for(int i = 0; i < s; i++){
+                insert(k[i], V[i]);
+            }
+        }
+
+        ~two4Tree() {
+            deconstructTree();
         }
 
         valuetype * search(keytype k) { //merge down
-
+            Node<keytype, valuetype> *x = root;
+            while(x != nullptr){
+                int i = 0;
+                while(i < x->elements.length() && k > x->elements[i].key){
+                    i = i + 1;
+                }
+                if(i <= x->elements.length() && k == x->elements[i].key){
+                    return ()
+                }else if(x.leaf){
+                    return NULL;
+                }else{
+                    x = x->children[i];
+                }
+            }
         }
 
-        void insert(keytype k, valuetype v) { //implement counter
+        void insert(const keytype& key, const valuetype& value) {
+            // Call a helper function to recursively insert the key-value pair
+            insertRecursive(root, key, value);
+            size++; // Increment the size of the tree
+        }
 
-            Node<keytype, valuetype> *r = root;
-
-            if (r->elements.size() == 3) {
-                Node<keytype, valuetype> s = new Node<keytype, valuetype>;
-                root = s;
-                s.leaf = false;
-                s.size = 0;
-                s.left = r;
-                split(s, 1);
-                insertNonefull(s, k, v)
+        void insertRecursive(Node<keytype, valuetype>* node, const keytype& key, const valuetype& value) {
+            // Check if the current node is a leaf node
+            if (node->leaf) {
+                // Insert the key-value pair into the current node
+                if (node->size < 3) {
+                    // If there is space in the node, simply insert the pair
+                    Element<keytype, valuetype> element;
+                    element.setKey(key, value);
+                    node->elements.addEnd(element);
+                    node->size++;
+                } else {
+                    // Otherwise, split the node and recursively insert into the appropriate child
+                    // (you'll need to implement the splitting logic)
+                }
             } else {
-                insertNonefull(root, k, v);
+                // Find the appropriate child to recursively insert into
+                // (you'll need to implement the search logic)
             }
         }
 
@@ -100,7 +112,6 @@ class two4Tree {
 
             int i = node->elements.size();
 
-            if ()
         }
 
         void split(Node<keytype, valuetype> *node, int i) {
@@ -121,44 +132,16 @@ class two4Tree {
 
             z->size = 1;
 
-            for (int i = 0, i < 0; i++){
+        }
 
+        void deconstructTree(Node<keytype, valuetype>* node){
+            if(node){
+                for(int i = 0; i < node->size + 1; i++){
+                    deconstructTree(node->children[i]);
+                }
+
+                delete node;
             }
-
-            if (!y->leaf) {
-                for (int i = 0, )
-            }
         }
 
-        int remove(keytype k) {
-
-        }
-
-        int rank(keytype k) { //return leftmost rank for duplicates
-
-        }
-
-        keytype select(int pos) {
-
-        }
-
-        int duplicates(keytype k) {
-
-        }
-
-        int size() {
-
-        }
-
-        void preorder() {
-
-        }
-
-        void inorder() {
-
-        }
-
-        void postorder() {
-
-        }
 };
