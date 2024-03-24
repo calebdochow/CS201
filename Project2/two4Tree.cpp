@@ -152,16 +152,71 @@ class two4Tree {
         }
 
         void insert(const keytype& key, const valuetype& value) {
-            
+            Node<keytype, valuetype>* r = root;
+            if(r->kN == 2 * r->kNS - 1){
+                Node<keytype, valuetype>* s = new Node<keytype, valuetype>();
+                root = s;
+                s->leaf = false;
+                s->kN = 0;
+                s->kNS = 1;
+                s->children[0] = r;
+                split(s, 0);
+                insertNonefull(s, key, value);
+                root = s;
+            }else{
+                insertNonefull(r, key, value);
+            }
         }
 
 
-        void insertNonefull(Node<keytype, valuetype> *node, keytype k, valuetype v) {
+        void insertNonefull(Node<keytype, valuetype> *x, keytype k, valuetype v) {
+            int i = x->kN;
+            if(x->leaf){
+                while(i >= 0 && k< x->elements[i].key){
+                    x->elements[i+1] = x->elements[i];
+                    i--;
+                }
+                x->elements[i+1].setKey(k, v);
+                x->kN++;
+            }else{
+                while(i >= 0 && k< x->elements[i].key){
+                    i--;
+                }
+                i++;
+                if(x->children[i]->kN == 2 * x->children[i]->kNS - 1){
+                    split(x, i);
+                    if(k > x->elements[i].key){
+                        i++;
+                    }
 
+                }
+                insertNonefull(x->children[i], k, v);
+            }
         }
 
-        void split(Node<keytype, valuetype> *node, int i) {
-           
+        void split(Node<keytype, valuetype> *x, int i) {
+            Node<keytype, valuetype>* y = x->children[i];
+            Node<keytype, valuetype>* z = new Node<keytype, valuetype>();
+            z->leaf = y->leaf;
+            z->kN = x->kNS -1;
+            for (int j = 0; j < x->kNS - 1; j++) {
+                z->elements[j] = y->elements[j + x->kNS];
+            }
+            if (!y->leaf) {
+                for (int j = 0; j < x->kNS; j++) {
+                    z->children[j] = y->children[j + x->kNS];
+                }
+            }
+            y->kN = x->kNS - 1;
+            for (int j = x->kN; j >= i + 1; j--) {
+                x->children[j + 1] = x->children[j];
+            }
+            x->children[i + 1] = z;
+            for (int j = x->kN - 1; j >= i; j--) {
+                x->elements[j + 1] = x->elements[j];
+            }
+            x->elements[i] = y->elements[x->kNS - 1];
+            x->kN++;
         }
 
 
