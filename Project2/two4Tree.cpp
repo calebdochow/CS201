@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stack>
 #include "CircularDynamicArray.cpp"
 using namespace std;
 
@@ -11,6 +12,12 @@ class Element {
 
         Element() {
             isEmpty = true;
+        }
+
+        Element(K k, V value) {
+            isEmpty = false;
+            key = k;
+            values.addEnd(value);
         }
 
         void setKey(K k, V value) {
@@ -63,6 +70,7 @@ class two4Tree {
     public:
 
         Node<keytype, valuetype> *root; 
+        int treeSize;
         
         two4Tree() {
             Node<keytype, valuetype> *x = new Node<keytype, valuetype>();
@@ -70,6 +78,7 @@ class two4Tree {
             x->kN = 0;
             x->kNS = 0;
             root = x;
+            treeSize = 0;
         }
 
         two4Tree(keytype k[], valuetype V[], int s) {
@@ -77,6 +86,7 @@ class two4Tree {
             root = x;
             x->kN = 0;
             x->kNS = 0;
+            treeSize = s;
 
             for(int i = 0; i < s; i++){
                 insert(k[i], V[i]);
@@ -134,6 +144,7 @@ class two4Tree {
             return newNode;
         }
 
+        /*
         valuetype * search(keytype k) { //merge down
             Node<keytype, valuetype> *x = root;
             while(x != nullptr){
@@ -150,19 +161,20 @@ class two4Tree {
                 }
             }
         }
+        */
 
         void insert(const keytype& key, const valuetype& value) {
             Node<keytype, valuetype>* r = root;
-            if(r->kN == 2 * r->kNS - 1){
+            treeSize++;
+            if(r->kN == 3){
+             
                 Node<keytype, valuetype>* s = new Node<keytype, valuetype>();
                 root = s;
                 s->leaf = false;
                 s->kN = 0;
-                s->kNS = 1;
                 s->children[0] = r;
-                split(s, 0);
+                split(s, 1);
                 insertNonefull(s, key, value);
-                root = s;
             }else{
                 insertNonefull(r, key, value);
             }
@@ -171,53 +183,127 @@ class two4Tree {
 
         void insertNonefull(Node<keytype, valuetype> *x, keytype k, valuetype v) {
             int i = x->kN;
+            
             if(x->leaf){
-                while(i >= 0 && k< x->elements[i].key){
-                    x->elements[i+1] = x->elements[i];
+               
+                while(i > 0 && k< x->elements[i-1].key){
+                    x->elements[i] = x->elements[i-1];
                     i--;
                 }
-                x->elements[i+1].setKey(k, v);
+                cout << " IMPORTANT i: " << i << endl;
+                Element<keytype, valuetype> newElement(k, v);
+                x->elements[i] = newElement;
                 x->kN++;
             }else{
-                while(i >= 0 && k< x->elements[i].key){
+                
+                while(i > 0 && k < x->elements[i-1].key){
                     i--;
                 }
                 i++;
-                if(x->children[i]->kN == 2 * x->children[i]->kNS - 1){
+                
+                if(x->children[i-1]->kN == 3){
                     split(x, i);
-                    if(k > x->elements[i].key){
+                    if(k > x->elements[i-1].key){
                         i++;
                     }
-
+                    
                 }
-                insertNonefull(x->children[i], k, v);
+                insertNonefull(x->children[i-1], k, v);
             }
         }
 
         void split(Node<keytype, valuetype> *x, int i) {
-            Node<keytype, valuetype>* y = x->children[i];
             Node<keytype, valuetype>* z = new Node<keytype, valuetype>();
+            Node<keytype, valuetype>* y = x->children[i-1];
+            //y = x->children[i-1];
             z->leaf = y->leaf;
-            z->kN = x->kNS -1;
-            for (int j = 0; j < x->kNS - 1; j++) {
-                z->elements[j] = y->elements[j + x->kNS];
-            }
+            
+            z->kN = 1;
+            z->elements[0] = y->elements[2];
+            
             if (!y->leaf) {
-                for (int j = 0; j < x->kNS; j++) {
-                    z->children[j] = y->children[j + x->kNS];
+                for (int j = 0; j < 2; j++) {
+                    z->children[j] = y->children[j + 2];
                 }
             }
-            y->kN = x->kNS - 1;
-            for (int j = x->kN; j >= i + 1; j--) {
+
+            y->kN = 1;
+
+            for (int j = x->kN; j > i; j--) {
                 x->children[j + 1] = x->children[j];
             }
-            x->children[i + 1] = z;
-            for (int j = x->kN - 1; j >= i; j--) {
+
+            x->children[i] = z;
+
+            for (int j = x->kN - 1; j > i - 1; j--) {
                 x->elements[j + 1] = x->elements[j];
             }
-            x->elements[i] = y->elements[x->kNS - 1];
+
+            x->elements[i-1] = y->elements[1];
             x->kN++;
         }
 
+        void preorder(){
+            if (root == nullptr){return;}
 
+            stack<Node<keytype, valuetype>*> nodeStack;
+            nodeStack.push(root);
+
+            while (!nodeStack.empty()) {
+                Node<keytype, valuetype>* current = nodeStack.top();
+                nodeStack.pop();
+
+                for (int i = 0; i < current->kN; i++) {
+                    cout << current->elements[i].key << " ";
+                }
+
+                for (int i = current->kN; i >= 0; i--) {
+                    if (current->children[i] != nullptr) {
+                        nodeStack.push(current->children[i]);
+                    }
+                }
+            }
+        }
+
+        void inorder() {
+            
+        }
+
+        void postorder() {
+            if (root == nullptr){return;}
+
+            stack<Node<keytype, valuetype>*> nodeStack;
+            stack<Node<keytype, valuetype>*> outputStack; // To reverse the postorder result
+
+            nodeStack.push(root);
+
+            while (!nodeStack.empty()) {
+                Node<keytype, valuetype>* current = nodeStack.top();
+                nodeStack.pop();
+
+                // Push the current node to the output stack
+                outputStack.push(current);
+
+                // Push left child first
+                for (int i = current->kN; i >= 0; --i) {
+                    if (current->children[i] != nullptr) {
+                        nodeStack.push(current->children[i]);
+                    }
+                }
+            }
+
+            // Print the keys from the output stack to get the postorder traversal result
+            while (!outputStack.empty()) {
+                Node<keytype, valuetype>* current = outputStack.top();
+                outputStack.pop();
+
+                for (int i = 0; i < current->kN; ++i) {
+                    cout << current->elements[i].key << " ";
+                }
+            }
+        }
+
+        int size() {
+            return treeSize/2;
+        }
 };
