@@ -133,7 +133,9 @@ class two4Tree {
                 return nullptr;
             }
             Node<keytype, valuetype>* newNode = new Node<keytype, valuetype>;
-            newNode->elements = node->elements;
+            for (int i = 0; i < node->kN; ++i) {
+                newNode->elements[i] = node->elements[i];
+            }   
             newNode->leaf = node->leaf;
             newNode->kN = node->kN;
             newNode->kNS = node->kNS;
@@ -144,24 +146,25 @@ class two4Tree {
             return newNode;
         }
 
-        /*
+        
         valuetype * search(keytype k) { //merge down
             Node<keytype, valuetype> *x = root;
             while(x != nullptr){
                 int i = 0;
-                while(i < x->elements.length() && k > x->elements[i].key){
-                    i = i + 1;
+                while(i < x->kN && k > x->elements[i].key){
+                    i++;
                 }
-                if(i <= x->elements.length() && k == x->elements[i].key){
-                    return 0;
+                if(i < x->kN && k == x->elements[i].key){
+                    return &(x->elements[i].values[0]);
                 }else if(x->leaf){
-                    return NULL;
+                    return nullptr;
                 }else{
                     x = x->children[i];
                 }
             }
+            return nullptr;
         }
-        */
+        
 
         void insert(const keytype& key, const valuetype& value) {
             Node<keytype, valuetype>* r = root;
@@ -226,7 +229,6 @@ class two4Tree {
                     z->children[j] = y->children[j + 2];
                 }
             }
-
             y->kN = 1;
 
             for (int j = x->kN; j > i; j--) {
@@ -241,6 +243,10 @@ class two4Tree {
 
             x->elements[i-1] = y->elements[1];
             x->kN++;
+        }
+
+        int remove(keytype k){
+
         }
 
         void preorder(){
@@ -307,3 +313,5 @@ class two4Tree {
             return treeSize/2;
         }
 };
+
+//always pull from predecessor
