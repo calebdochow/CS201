@@ -90,7 +90,6 @@ class two4Tree {
 
             for(int i = 0; i < s; i++){
                 insert(k[i], V[i]);
-                //cout << "Key: " << k[i] << " Value: " << V[i] << endl;
             }
         }
 
@@ -218,7 +217,7 @@ class two4Tree {
         void split(Node<keytype, valuetype> *x, int i) {
             Node<keytype, valuetype>* z = new Node<keytype, valuetype>();
             Node<keytype, valuetype>* y = x->children[i-1];
-            //y = x->children[i-1];
+            
             z->leaf = y->leaf;
             
             z->kN = 1;
@@ -247,7 +246,7 @@ class two4Tree {
 
         int remove(keytype k) {
             treeSize--;
-            return deleteKey(root, k); // Call deleteKey to remove the key
+            return deleteKey(root, k);
         }
 
         int deleteKey(Node<keytype, valuetype>* node, keytype k) {
@@ -274,14 +273,14 @@ class two4Tree {
                         return 1; // Key removed successfully
                     } else {
                         // Merge with siblings if possible
-                        if (mergeWithSiblings(node, i)) {
+                        //if (mergeWithSiblings(node, i)) {
                             // Merge successful, key removed
-                            return 1;
-                        } else {
+                        //    return 1;S
+                        //} else {
                             // Merge not possible, handle accordingly
                             // Here, you might want to adjust the tree structure or handle the case differently
-                            return 0; // For example, return 0 to indicate deletion failure
-                        }
+                          //  return 0; // For example, return 0 to indicate deletion failure
+                        //}
                     }
                 } else { // Case 2: Internal node
                     // Find predecessor
@@ -300,10 +299,15 @@ class two4Tree {
             } else { // Key may be in child node
                 // Ensure that the child node exists before accessing its properties
                 if (i < node->kN) {
+                    if(node->children[i]->kN == 1 && node->children[i+1]->kN > 1){
+                        //rotate
+                    }
+
+
+
                     Node<keytype, valuetype>* child = node->children[i];
                     return deleteKey(child, k);
                 } else {
-                    // Handle the case when the child node doesn't exist
                     return 0; // For example, return 0 to indicate key not found
                 }
             }
