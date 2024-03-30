@@ -254,61 +254,44 @@ class two4Tree {
                 return 0; // Key not found
             }
 
-            // Find the index of the key in the node's elements
-            int i = 0;
-            while (i < node->kN && k > node->elements[i].key) {
-                i++;
-            }
+            if(*(search(node)) != nullptr){
 
-            // Key found in the current node
-            if (i < node->kN && k == node->elements[i].key) {
-                // Case 1: Leaf node
-                if (node->leaf) {
-                    if (node->kN > 1) {
-                        // Remove the key from the node
-                        for (int j = i; j < node->kN - 1; j++) {
-                            node->elements[j] = node->elements[j + 1];
-                        }
-                        node->kN--;
-                        return 1; // Key removed successfully
-                    } else {
-                        // Merge with siblings if possible
-                        //if (mergeWithSiblings(node, i)) {
-                            // Merge successful, key removed
-                        //    return 1;S
-                        //} else {
-                            // Merge not possible, handle accordingly
-                            // Here, you might want to adjust the tree structure or handle the case differently
-                          //  return 0; // For example, return 0 to indicate deletion failure
-                        //}
-                    }
-                } else { // Case 2: Internal node
-                    // Find predecessor
-                    Node<keytype, valuetype>* predNode = node->children[i];
-                    while (!predNode->leaf) {
-                        predNode = predNode->children[predNode->kN];
-                    }
-
-                    // Replace the key with predecessor
-                    keytype predecessorKey = predNode->elements[predNode->kN - 1].key;
-                    node->elements[i].key = predecessorKey;
-
-                    // Recursively delete the predecessor key
-                    return deleteKey(predNode, predecessorKey);
+                // Find the index of the key in the node's elements
+                int i = 0;
+                while (i < node->kN && k > node->elements[i].key) {
+                    i++;
                 }
-            } else { // Key may be in child node
-                // Ensure that the child node exists before accessing its properties
-                if (i < node->kN) {
+
+                // Key found in the current node
+                if (i < node->kN && k == node->elements[i].key) {
+                    // Case 1: Leaf node
+                    if (node->leaf) {
+                        if (node->kN > 1) {
+                            // Remove the key from the node
+                            for (int j = i; j < node->kN - 1; j++) {
+                                node->elements[j] = node->elements[j + 1];
+                            }
+                            node->kN--;
+                            return 1; // Key removed successfully
+                        }
+                    }
+                    // Case 2: Root
+                    //DO THE ROTATIONS AND SHIT TO REMOVE ROOT
+
+                } else { // Key may be in child node
+
                     if(node->children[i]->kN == 1 && node->children[i+1]->kN > 1){
-                        //rotate
+                        //rotate left
+                    }else if(node->children[i]->kN == 1 && node->children[i-1]->kN > 1){
+                        //rotate right
                     }
 
-
+                    if(node->kN > 1 && node->children[i]->elements[0].key == k && node->children[i]->kN == 1){
+                        //merge
+                    }
 
                     Node<keytype, valuetype>* child = node->children[i];
                     return deleteKey(child, k);
-                } else {
-                    return 0; // For example, return 0 to indicate key not found
                 }
             }
         }
