@@ -230,13 +230,13 @@ class two4Tree {
             }
             y->kN = 1;
 
-            for (int j = x->kN; j > i; j--) {
+            for (int j = x->kN; j > i - 1; j--) {
                 x->children[j + 1] = x->children[j];
             }
 
             x->children[i] = z;
 
-            for (int j = x->kN - 1; j > i - 1; j--) {
+            for (int j = x->kN - 1; j > i - 2; j--) {
                 x->elements[j + 1] = x->elements[j];
             }
 
@@ -262,6 +262,10 @@ class two4Tree {
                     i++;
                 }
 
+                Node<keytype, valuetype>* leftSibling = node->children[i];
+                Node<keytype, valuetype>* rightSibling = node->children[i + 1];
+                Node<keytype, valuetype>* child = node->children[i];
+
                 // Key found in the current node
                 if (i < node->kN && k == node->elements[i].key) {
                     // Case 1: Leaf node
@@ -280,121 +284,69 @@ class two4Tree {
 
                 } else { // Key may be in child node
 
-                    if(node->children[i]->kN == 1 && node->children[i+1]->kN > 1){
-                        //rotate left
-                    }else if(node->children[i]->kN == 1 && node->children[i-1]->kN > 1){
-                        //rotate right
+                    if(node->children[i]->kN == 1 && node->children[i+1]->kN == 1){ //MERGE CAUSE BOTH SIBLING kN == 1
+                
+                        // Move the key from the node down to the left Sibling
+                        leftSibling->elements[leftSibling->kN] = node->elements[i];
+                        leftSibling->kN++;
+
+                        // Move the keys and sibling pointers from the right sibling to the left sibling
+                        for (int i = 0; i < rightSibling->kN; i++) {
+                            leftSibling->elements[leftSibling->kN] = rightSibling->elements[i];
+                            leftSibling->kN++;
+                            leftSibling->children[leftSibling->kN] = rightSibling->children[i];
+                            if (!rightSibling->leaf)
+                                rightSibling->children[i] = nullptr;
+                        }
+
+                        // Move the last sibling pointer
+                        leftSibling->children[leftSibling->kN] = rightSibling->children[rightSibling->kN];
+
+                        if (!rightSibling->leaf)
+                            rightSibling->children[rightSibling->kN] = nullptr;
+
+                        // Remove the key from the node
+                        for (int i = i; i < node->kN - 1; i++) {
+                            node->elements[i] = node->elements[i + 1];
+                            node->children[i + 1] = node->children[i + 2];
+                        }
+                        node->kN--;
+
+                        // Free memory of the right child
+                        delete rightSibling;
+
+                    }else if(node->children[i]->kN == 1 && node->children[i+1]->kN > 1){ //Rotate Left CAUSE EXTRA kN ON RIGHT
+                        //move node key down to leftsibling node
+                        leftSibling->elements[leftSibling->kN] = node->elements[i];
+                        leftSibling->kN++;
+
+                        //move the leftmost key from leftSibling node up to parent
+                        node->elements[i] = rightSibling->elements[0];
+                        
+                        //adjust child points if leftSibling is not a leaf
+                        if(!leftSibling->leaf){
+                            leftSibling->children[leftSibling->kN] = rightSibling->children[0];
+                            rightSibling->children[0] = nullptr;
+                        }
+
+                        //shift keys and child pointers in right sibling to the left
+                        for(int i = 0; i < rightSibling->kN - 1; i++){
+                            rightSibling->elements[i] = rightSibling->elements[i+1];
+                            rightSibling->children[i] = rightSibling->children[i+1];
+                        }
+
+                        rightSibling->children[rightSibling->kN - 1] = rightSibling->children[rightSibling->kN];
+                        rightSibling->children[rightSibling->kN] = nullptr;
+                        rightSibling->kN--;
+
+                    }else if(node->children[i]->kN == 1 && node->children[i - 1]->kN > 1){ //ROTATE RIGHT CAUSE EXTRA kN ON LEFT
+                        //
                     }
 
-                    if(node->kN > 1 && node->children[i]->elements[0].key == k && node->children[i]->kN == 1){
-                        //merge
-                    }
 
-                    Node<keytype, valuetype>* child = node->children[i];
                     return deleteKey(child, k);
                 }
             }
-        }
-
-
-        void mergeWithSiblings(Node<keytype, valuetype>* parent, int index) {
-            // Ensure that the parent and index are valid
-            if (!parent || index < 0 || index >= parent->kN || !parent->children[index] || !parent->children[index + 1]) {
-                return; // Merge not possible
-            }
-
-            // If there is a left sibling, merge with it
-            if (index > 0) {
-                Node<keytype, valuetype>* leftChild = parent->children[index - 1];
-                Node<keytype, valuetype>* rightChild = parent->children[index];
-
-                // Move the key from the parent down to the left child
-                leftChild->elements[leftChild->kN] = parent->elements[index - 1];
-                leftChild->kN++;
-
-                // Move the keys and child pointers from the right child to the left child
-                for (int i = 0; i < rightChild->kN; i++) {
-                    leftChild->elements[leftChild->kN] = rightChild->elements[i];
-                    leftChild->kN++;
-                    leftChild->children[leftChild->kN] = rightChild->children[i];
-                    if (!rightChild->leaf)
-                        rightChild->children[i] = nullptr; // Avoid dangling pointers
-                }
-                leftChild->children[leftChild->kN] = rightChild->children[rightChild->kN]; // Move the last child pointer
-                if (!rightChild->leaf)
-                    rightChild->children[rightChild->kN] = nullptr; // Avoid dangling pointers
-
-                // Remove the key from the parent
-                for (int i = index - 1; i < parent->kN - 1; i++) {
-                    parent->elements[i] = parent->elements[i + 1];
-                    parent->children[i + 1] = parent->children[i + 2];
-                }
-                parent->kN--;
-
-                // Free memory of the right child
-                delete rightChild;
-            } else { // If there is a right sibling, merge with it
-                Node<keytype, valuetype>* leftChild = parent->children[index];
-                Node<keytype, valuetype>* rightChild = parent->children[index + 1];
-
-                // Move the key from the parent down to the left child
-                leftChild->elements[leftChild->kN] = parent->elements[index];
-                leftChild->kN++;
-
-                // Move the keys and child pointers from the right child to the left child
-                for (int i = 0; i < rightChild->kN; i++) {
-                    leftChild->elements[leftChild->kN] = rightChild->elements[i];
-                    leftChild->kN++;
-                    leftChild->children[leftChild->kN] = rightChild->children[i];
-                    if (!rightChild->leaf)
-                        rightChild->children[i] = nullptr; // Avoid dangling pointers
-                }
-                leftChild->children[leftChild->kN] = rightChild->children[rightChild->kN]; // Move the last child pointer
-                if (!rightChild->leaf)
-                    rightChild->children[rightChild->kN] = nullptr; // Avoid dangling pointers
-
-                // Remove the key from the parent
-                for (int i = index; i < parent->kN - 1; i++) {
-                    parent->elements[i] = parent->elements[i + 1];
-                    parent->children[i + 1] = parent->children[i + 2];
-                }
-                parent->kN--;
-
-                // Free memory of the right child
-                delete rightChild;
-            }
-        }
-
-
-        void rotateLeft(Node<keytype, valuetype>* parent, int index){
-            if(!parent || index < 0 || index >=parent->kN || !parent->children[index] || !parent->children[index+1]){return;}
-
-            Node<keytype, valuetype>* current = parent->children[index];
-            Node<keytype, valuetype>* rightSibling = parent->children[index + 1];
-
-            //move parents key down to current node
-            current->elements[current->kN] = parent->elements[index];
-            current->kN++;
-
-            //move the leftmost key from current node up to parent
-            parent->elements[index] = rightSibling->elements[0]; //CARE
-
-            //adjust child points if current is not a leaf
-            if(!current->leaf){
-                current->children[current->kN] = rightSibling->children[0];
-                rightSibling->children[0] = nullptr;
-            }
-            
-            //shift keys and child pointers in right child to the left
-            for(int i = 0; i < rightSibling->kN - 1; i++){
-                rightSibling->elements[i] = rightSibling->elements[i+1];
-                rightSibling->children[i] = rightSibling->children[i+1];
-            }
-
-            rightSibling->children[rightSibling->kN - 1] = rightSibling->children[rightSibling->kN];
-            rightSibling->children[rightSibling->kN] = nullptr;
-            
-            rightSibling->kN--;
         }
         
         void preorder(){
