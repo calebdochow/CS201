@@ -254,7 +254,7 @@ class two4Tree {
                 return 0; // Key not found
             }
 
-            if(*(search(node)) != nullptr){
+            if((search(k)) != nullptr){
 
                 // Find the index of the key in the node's elements
                 int i = 0;
@@ -345,8 +345,10 @@ class two4Tree {
 
 
                     return deleteKey(child, k);
+                    return 0;
                 }
             }
+            return 0;
         }
         
         void preorder(){

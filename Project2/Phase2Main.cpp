@@ -10,10 +10,10 @@ int main(){
 	two4Tree<string,float> T1(K,V,12), T2;
 	T1.preorder(); 
 	cout << endl;
-	//cout << endl << "S: " << T1.size() << endl;
-	//cout << "REMOVE C " << T1.remove("C") << endl;
-	//T1.preorder();
-	//cout << endl << "S: " << T1.size() << endl;
+	cout << endl << "S: " << T1.size() << endl;
+	cout << "REMOVE A " << T1.remove("A") << endl;
+	T1.preorder();
+	cout << endl << "S: " << T1.size() << endl;
 	
 
 	return 0;
