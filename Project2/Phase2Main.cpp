@@ -11,7 +11,7 @@ int main(){
 	T1.preorder(); 
 	cout << endl;
 	cout << endl << "S: " << T1.size() << endl;
-	cout << "REMOVE A " << T1.remove("A") << endl;
+	cout << "REMOVE B " << T1.remove("B") << endl;
 	T1.preorder();
 	cout << endl << "S: " << T1.size() << endl;
 	
