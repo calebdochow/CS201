@@ -51,6 +51,7 @@ class Node {
             children[3] = nullptr;
             kN = 0;
             kNS = 0;
+            leaf = true;
         }
 
         Node(key k, value v) { //Constructor
@@ -62,6 +63,7 @@ class Node {
             children[3] = nullptr;
             kN = 1;
             kNS = 1;
+            leaf = true;
         }
 };
 
@@ -170,7 +172,6 @@ class two4Tree {
             Node<keytype, valuetype>* r = root;
             treeSize++;
             if(r->kN == 3){
-             
                 Node<keytype, valuetype>* s = new Node<keytype, valuetype>();
                 root = s;
                 s->leaf = false;
@@ -217,7 +218,7 @@ class two4Tree {
         void split(Node<keytype, valuetype> *x, int i) {
             Node<keytype, valuetype>* z = new Node<keytype, valuetype>();
             Node<keytype, valuetype>* y = x->children[i-1];
-            
+        
             z->leaf = y->leaf;
             
             z->kN = 1;
@@ -264,6 +265,7 @@ class two4Tree {
             if (i < node->kN && k == node->elements[i].key) {
                 // Case 1: Leaf node
                 if (node->leaf) {
+                    cout << "MAYBE" << endl;
                     if (node->elements[i].values.length() == 1) {
                         // Remove the key from the node
                         for (int j = i; j < node->kN - 1; j++) {
@@ -305,7 +307,7 @@ class two4Tree {
                             rightSibling->kN--;
 
                             if(!rightSibling->leaf){
-                                //rightSibling->children[0]->parent = child;
+                               
                                 child->children[child->kN] = rightSibling->children[0];
 
                                 for(int j = 0; j < rightSibling->kN + 1; j++){
@@ -324,7 +326,7 @@ class two4Tree {
                             if(!rightSibling->leaf){
                                 for(int j = 0; j < rightSibling->kN+1; j++){
                                     child->children[child->kN - rightSibling->kN + j] = rightSibling->children[i];
-                                    //child->children[child->kN - rightSibling->kN + j]->parent = child;
+                                
                                 }
                             }
                             
@@ -360,7 +362,7 @@ class two4Tree {
                                 for(int j = child->kN; j > 0; j--){
                                     child->children[j] = child->children[i-1];
                                 }
-                                //leftSibling->children[leftSibling->kN]->parent = child;
+                            
                                 child->children[0] = leftSibling->children[leftSibling->kN];
                             }
                             leftSibling->kN--;
@@ -373,7 +375,7 @@ class two4Tree {
 
                             if(!child->leaf){
                                 for(int j = 0; j < child->kN + 1; j++){
-                                    //child->children[i]->parent = leftSibling;
+                                 
                                     leftSibling->children[leftSibling->kN - child->kN + j] = child->children[j];
                                 }
                             }
@@ -403,11 +405,9 @@ class two4Tree {
 
         Element<keytype, valuetype> getPredecessor(Node<keytype, valuetype> *node, int index){
             Node<keytype, valuetype>* current = node->children[index];
-            cout << "CURRENT: " << current->elements[index].key<<endl;
             while (!current->leaf) {
-                current = current->children[current->kN - 1];
+                current = current->children[current->kN];
             }
-
             return current->elements[current->kN - 1];
         }
         
@@ -434,14 +434,39 @@ class two4Tree {
         }
 
         void inorder() {
-            
+            if (root == nullptr){return;}
+
+            stack<Node<keytype, valuetype>*> nodeStack;
+            Node<keytype, valuetype>* current = root;
+
+            while (current != nullptr || !nodeStack.empty()) {
+                
+                while (current != nullptr) {
+                    nodeStack.push(current);
+                    current = current->children[0];
+                }
+
+             
+                current = nodeStack.top();
+                nodeStack.pop();
+
+               
+                for (int i = 0; i < current->kN; ++i) {
+                    for (int j = 0; j < current->elements[i].values.length(); ++j) {
+                        cout << current->elements[i].key << " ";
+                    }
+                }
+
+                
+                current = current->children[current->kN];
+            }
         }
 
         void postorder() {
             if (root == nullptr){return;}
 
             stack<Node<keytype, valuetype>*> nodeStack;
-            stack<Node<keytype, valuetype>*> outputStack; // To reverse the postorder result
+            stack<Node<keytype, valuetype>*> outputStack;
 
             nodeStack.push(root);
 
@@ -449,10 +474,8 @@ class two4Tree {
                 Node<keytype, valuetype>* current = nodeStack.top();
                 nodeStack.pop();
 
-                // Push the current node to the output stack
                 outputStack.push(current);
 
-                // Push left child first
                 for (int i = current->kN; i >= 0; --i) {
                     if (current->children[i] != nullptr) {
                         nodeStack.push(current->children[i]);
@@ -460,7 +483,6 @@ class two4Tree {
                 }
             }
 
-            // Print the keys from the output stack to get the postorder traversal result
             while (!outputStack.empty()) {
                 Node<keytype, valuetype>* current = outputStack.top();
                 outputStack.pop();
@@ -472,6 +494,25 @@ class two4Tree {
         }
 
         int size() {
-            return treeSize/2;
+            return treeSize;
+        }
+
+        int duplicates(keytype k){
+            int count = 0;
+            Node<keytype, valuetype> *x = root;
+            while (x != nullptr) {
+                int i = 0;
+                while (i < x->kN && k > x->elements[i].key) {
+                    i++;
+                }
+                if (i < x->kN && k == x->elements[i].key) {
+                    count += x->elements[i].values.length();
+                }
+                if (x->leaf) {
+                    break;
+                }
+                x = x->children[i];
+            }
+            return count;
         }
 };
