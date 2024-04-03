@@ -3,6 +3,12 @@
 #include "CircularDynamicArray.cpp"
 using namespace std;
 
+/*
+-cannot delete internal nodes
+-rank not implemented
+-select not implemented
+*/
+
 template <typename K, typename V>
 class Element {
     public:
@@ -265,7 +271,6 @@ class two4Tree {
             if (i < node->kN && k == node->elements[i].key) {
                 // Case 1: Leaf node
                 if (node->leaf) {
-                    cout << "MAYBE" << endl;
                     if (node->elements[i].values.length() == 1) {
                         // Remove the key from the node
                         for (int j = i; j < node->kN - 1; j++) {
@@ -279,6 +284,7 @@ class two4Tree {
                 }else{ //internal node
                     if(node->elements[i].values.length() == 1){
                         Element<keytype, valuetype> predecessor = getPredecessor(node, i);
+                        node->leaf = true; 
                         node->elements[i] = predecessor;
                         return deleteKey(node, predecessor.key);
                     }else{
@@ -514,5 +520,13 @@ class two4Tree {
                 x = x->children[i];
             }
             return count;
+        }
+
+        int rank(keytype k){
+            return 0;
+        }
+
+        int select(int pos){
+            return 0; 
         }
 };
