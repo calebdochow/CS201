@@ -1,27 +1,36 @@
+#include <iostream>
+#include <cmath>
+using namespace std;
+
+template <typename KeyType>
+class Node {
+public:
+    KeyType key;
+    Node *parent;
+    Node* child;
+    Node* prev;
+    Node* next;
+    int degree;
+
+    Node(KeyType k) : key(k), parent(nullptr), child(nullptr), prev(nullptr), next(nullptr), degree(0) {}
+};
+
 template <typename KeyType>
 class BHeap {
 private:
-    class Node {
-    public:
-        KeyType key;
-        Node* parent;
-        Node* child;
-        Node* prev; // Pointer to the previous sibling
-        Node* next; // Pointer to the next sibling
-        Node* sibling;
-
-        Node(const KeyType& k);
-    };
-
-    Node* minNode; // Pointer to the minimum element in the heap
-    Node* rootList; // Circular doubly linked list of tree roots
+    Node<KeyType>* minNode; //minimum element in the heap
+    Node<KeyType>* rootList; // CDLL of tree roots
+    int size;
 
     void consolidate();
+    Node<KeyType>* copy(Node<KeyType>* node, Node<KeyType>* p);
 
 public:
     BHeap();
-    BHeap(KeyType k[], int s); // Constructor from array
+    BHeap(KeyType k[], int s); 
     ~BHeap();
+    BHeap(const BHeap<KeyType>& other); // Copy constructor
+    BHeap<KeyType>& operator=(const BHeap<KeyType>& other); // Copy assignment operator
 
     KeyType peekKey() const;
     KeyType extractMin();
@@ -29,18 +38,15 @@ public:
     void merge(BHeap<KeyType>& H2);
     void printKey() const;
     bool isEmpty() const;
-
+    void linkNodes(Node<KeyType>* other, Node<KeyType>* current);
 };
 
 template <typename KeyType>
-BHeap<KeyType>::Node::Node(const KeyType& k) : key(k), parent(nullptr), child(nullptr), prev(nullptr), next(nullptr), sibling(nullptr) {}
+BHeap<KeyType>::BHeap() : minNode(nullptr), rootList(nullptr), size(0) {}
 
 template <typename KeyType>
-BHeap<KeyType>::BHeap() : minNode(nullptr), rootList(nullptr) {}
-
-template <typename KeyType>
-BHeap<KeyType>::BHeap(KeyType k[], int s) : minNode(nullptr), rootList(nullptr) {
-    for (int i = 0; i < s; ++i) {
+BHeap<KeyType>::BHeap(KeyType k[], int s) : minNode(nullptr), rootList(nullptr), size(0) {
+    for (int i = 0; i < s; i++) {
         insert(k[i]);
     }
     consolidate();
@@ -48,16 +54,18 @@ BHeap<KeyType>::BHeap(KeyType k[], int s) : minNode(nullptr), rootList(nullptr) 
 
 template <typename KeyType>
 BHeap<KeyType>::~BHeap() {
-    // Free memory for nodes
-    Node* current = rootList;
+
+    Node<KeyType>* current = rootList;
+    
     while (current != nullptr) {
-        Node* next = current->next; // Store the next node using next pointer
-        delete current; // Delete the current node
-        if (next == rootList) break; // Exit if we have traversed the entire list
-        current = next; // Move to the next node
+        Node<KeyType>* next = current->next; 
+        delete current; 
+        if (next == rootList) break; 
+        current = next; 
     }
-    rootList = nullptr; // Ensure rootList is set to nullptr after deletion
-    minNode = nullptr; // Ensure minNode is set to nullptr after deletion
+
+    rootList = nullptr; 
+    minNode = nullptr; 
 }
 
 template <typename KeyType>
@@ -68,7 +76,7 @@ bool BHeap<KeyType>::isEmpty() const {
 template <typename KeyType>
 KeyType BHeap<KeyType>::peekKey() const {
     if (isEmpty()) {
-        throw runtime_error("Heap is empty");
+        throw std::runtime_error("Heap is empty");
     }
     return minNode->key;
 }
@@ -76,77 +84,88 @@ KeyType BHeap<KeyType>::peekKey() const {
 template <typename KeyType>
 KeyType BHeap<KeyType>::extractMin() {
     if (isEmpty()) {
-        throw runtime_error("Heap is empty");
+        throw std::runtime_error("Heap is empty");
     }
-    
-    KeyType minKey = minNode->key; // Save the minimum key
-    
-    // Remove the minimum node from the root list
-    if (minNode == minNode->next) { // Only one node in the heap
-        delete minNode;
-        minNode = nullptr;
-        rootList = nullptr;
-    } else {
-        Node* minNext = minNode->next;
-        Node* minPrev = minNode->prev;
-        
-        minPrev->next = minNext;
-        minNext->prev = minPrev;
-        
-        // Adjust the minNode if it's the one we're removing
-        if (minNode == rootList) {
-            rootList = minNext;
+    Node<KeyType>* x = minNode;
+
+    if(x != nullptr){
+        if(x->child != nullptr){
+            Node<KeyType>* child = x->child;
+            Node<KeyType>* nextChild = nullptr;
+            minNode = child;
+
+            while(child != nullptr){
+                nextChild = child->next;
+                child->prev = x->prev;
+                child->next = x;
+                x->prev->next = child;
+                x->prev = child;
+                child->parent = nullptr;
+                child = nextChild;
+            }
+        }else if(x == x->next){
+            minNode = nullptr;
+        }else{
+            minNode = x->next;
         }
-        
-        delete minNode;
-        minNode = nullptr;
+
+        x->prev->next = x->next;
+        x->next->prev = x->prev;
+
+        consolidate();
+        size--;
     }
-    
-    // Merge the children of the removed node with the root list
-    Node* child = rootList->child;
-    while (child != nullptr) {
-        Node* nextSibling = child->next;
-        child->prev = rootList->prev;
-        child->next = rootList;
-        rootList->prev->next = child;
-        rootList->prev = child;
-        child->parent = nullptr;
-        child = nextSibling;
-    }
-    
-    // Consolidate the heap
-    consolidate();
-    
-    return minKey;
+    KeyType key = x->key;
+    delete x;
+    return key;
 }
 
 template <typename KeyType>
 void BHeap<KeyType>::insert(const KeyType& k) {
-    Node* newNode = new Node(k);
-    if (rootList == nullptr) {
-        rootList = newNode;
-        newNode->prev = newNode; // Circular list, so point to itself
-        newNode->next = newNode; // Circular list, so point to itself
-        newNode->parent = nullptr;
-        newNode->child = nullptr;
+    Node<KeyType>* newNode = new Node<KeyType>(k);
+    if (minNode == nullptr) {
         minNode = newNode;
+        newNode->next = newNode;
+        newNode->prev = newNode;
+        
     } else {
-        newNode->next = minNode;
         newNode->prev = minNode->prev;
+        newNode->next = minNode;
         minNode->prev->next = newNode;
         minNode->prev = newNode;
 
-        newNode->parent = nullptr;
-
-        if (k < minNode->key) {
+        if (newNode->key < minNode->key) {
             minNode = newNode;
         }
     }
+    size++;
 }
 
 template <typename KeyType>
 void BHeap<KeyType>::merge(BHeap<KeyType>& H2) {
-    // Merge logic
+    Node<KeyType>* otherMin = H2.minNode;
+    Node<KeyType>* minPrev = minNode->prev;
+    Node<KeyType>* otherMinPrev = H2.minNode->prev;
+
+    otherMin->prev = minPrev;
+    minPrev->next = otherMin;
+
+    minNode->prev = otherMinPrev;
+    otherMinPrev->next = minNode;
+
+    if (minNode== nullptr || (H2.minNode != nullptr && H2.minNode->key < minNode->key)) {
+        minNode = H2.minNode;
+    }
+
+    size += H2.size;
+
+    H2.minNode = nullptr;
+    H2.size = 0;
+    size += H2.size;
+    
+    H2.rootList = nullptr;
+    H2.minNode = nullptr;
+    H2.size = 0;
 }
 
 template <typename KeyType>
@@ -156,17 +175,14 @@ void BHeap<KeyType>::printKey() const {
         return;
     }
 
-    Node* current = minNode;
-    Node* start = minNode; // Store the starting point to detect circularity
+    Node<KeyType>* current = minNode;
+    Node<KeyType>* start = minNode; 
 
     do {
-        int degree = 0;
-        Node* child = current->child;
+        int degree = current->degree; 
+        Node<KeyType>* child = current->child;
 
-        // Print the degree of the current tree
         cout << "B" << degree << ": ";
-
-        // Print the keys of the current tree
         cout << current->key;
 
         while (child != nullptr) {
@@ -176,7 +192,6 @@ void BHeap<KeyType>::printKey() const {
 
         cout << endl;
 
-        // Move to the next tree
         current = current->next;
     } while (current != start);
 }
@@ -187,69 +202,110 @@ void BHeap<KeyType>::consolidate() {
         return;
     }
 
-    // Find the maximum degree possible
-    int maxDegree = 0;
-    Node* temp = rootList;
-    do {
-        maxDegree++;
-        temp = temp->next;
-    } while (temp != rootList);
-
-    // Initialize an array to hold roots of trees with the same degree
-    Node** rootArray = new Node*[maxDegree + 1];
-    for (int i = 0; i <= maxDegree; ++i) {
+    int maxDegree = (int)(log2(size)) + 1;
+    
+    Node<KeyType>* rootArray[maxDegree];
+    for (int i = 0; i < maxDegree; i++) {
         rootArray[i] = nullptr;
     }
 
-    // Traverse the root list and merge trees with the same degree
-    Node* current = rootList;
-    while (current != nullptr) {
-        Node* nextNode = current->next;
-        int degree = 0;
-        Node* temp = current;
+
+    Node<KeyType>* current = minNode;
+
+    do {
+        Node<KeyType>* nextNode = current->next;
+        int degree = current->degree;
         while (rootArray[degree] != nullptr) {
-            Node* other = rootArray[degree];
+            Node<KeyType>* other = rootArray[degree];
             if (current->key > other->key) {
                 swap(current, other);
             }
-            // Link the other tree as a child of the current node
-            other->prev->next = other->next;
-            other->next->prev = other->prev;
-            other->next = current->child;
-            other->prev = current->child->prev;
-            current->child->prev->next = other;
-            current->child->prev = other;
-            other->parent = current;
-            other->prev->parent = current;
-            other->next->parent = current;
-            other->sibling = nullptr;
-            rootArray[degree] = nullptr; // Clear the slot in the array after merging
+            
+            linkNodes(other, current);
+            rootArray[degree] = nullptr; 
             degree++;
         }
         rootArray[degree] = current;
         current = nextNode;
-    }
+    } while(current != minNode);
 
-    // Reconstruct the root list from the rootArray
     minNode = nullptr;
-    rootList = nullptr;
-    for (int i = 0; i <= maxDegree; ++i) {
+    
+    for (int i = 0; i < maxDegree; i++) {
         if (rootArray[i] != nullptr) {
-            if (minNode == nullptr || rootArray[i]->key < minNode->key) {
+            if (minNode == nullptr) {
+                rootArray[i]->next = rootArray[i];
+                rootArray[i]->prev = rootArray[i];
                 minNode = rootArray[i];
-            }
-            if (rootList == nullptr) {
-                rootList = rootArray[i];
-                rootList->prev = rootList;
-                rootList->next = rootList;
-            } else {
-                rootArray[i]->prev = rootList->prev;
-                rootArray[i]->next = rootList;
-                rootList->prev->next = rootArray[i];
-                rootList->prev = rootArray[i];
-            }
+            }else{
+                rootArray[i]->prev = minNode->prev;
+                rootArray[i]->next = minNode;
+                minNode->prev->next = rootArray[i];
+                minNode->prev = rootArray[i];
+                
+                if(rootArray[i]->key < minNode->key){
+                    minNode = rootArray[i];
+                }
+            } 
         }
     }
+}
 
-    delete[] rootArray;
+template <typename KeyType>
+void BHeap<KeyType>::linkNodes(Node<KeyType>* other, Node<KeyType>* current) {
+    other->next->prev = other->prev;
+    other->prev->next = other->next;
+
+    other->next = nullptr;
+    other->prev = nullptr;
+
+    if (current->child != nullptr) {
+        Node<KeyType>* child = current->child;
+
+        while (child->next != nullptr) {
+            child = child->next;
+        }
+
+        child->next = other;
+        other->prev = child;
+    }
+    else {
+        current->child = other;
+    }
+
+    other->parent = current;
+    current->degree++;
+}
+
+template <typename KeyType>
+Node<KeyType>* BHeap<KeyType>::copy(Node<KeyType>* node, Node<KeyType>* p) {
+    if (!node) {
+        return nullptr;
+    }
+
+    Node<KeyType>* newNode = new Node<KeyType>(node->key);
+    newNode->degree = node->degree;
+    newNode->parent = p;
+
+    Node<KeyType>* child = node->child;
+    Node<KeyType>* copyChild = newNode->child;
+
+    while (child != nullptr) {
+        Node<KeyType>* x = copy(child, newNode);
+
+        if (copyChild == nullptr) {
+            copyChild = x;
+            newNode->child = x;
+        } else {
+            while (copyChild->next != nullptr) {
+                copyChild = copyChild->next;
+            }
+
+            copyChild->next = x;
+        }
+
+        child = child->next;
+    }
+
+    return newNode;
 }
