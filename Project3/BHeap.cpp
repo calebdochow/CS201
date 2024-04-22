@@ -37,6 +37,7 @@ public:
     void insert(const KeyType& k);
     void merge(BHeap<KeyType>& H2);
     void printKey() const;
+    void printKey(Node<KeyType> * node) const;
     bool isEmpty() const;
     void linkNodes(Node<KeyType>* other, Node<KeyType>* current);
 };
@@ -149,21 +150,14 @@ void BHeap<KeyType>::merge(BHeap<KeyType>& H2) {
 
     otherMin->prev = minPrev;
     minPrev->next = otherMin;
-
     minNode->prev = otherMinPrev;
     otherMinPrev->next = minNode;
 
-    if (minNode== nullptr || (H2.minNode != nullptr && H2.minNode->key < minNode->key)) {
+    if (minNode == nullptr || (H2.minNode != nullptr && H2.minNode->key < minNode->key)) {
         minNode = H2.minNode;
     }
 
     size += H2.size;
-
-    H2.minNode = nullptr;
-    H2.size = 0;
-    size += H2.size;
-    
-    H2.rootList = nullptr;
     H2.minNode = nullptr;
     H2.size = 0;
 }
@@ -176,24 +170,29 @@ void BHeap<KeyType>::printKey() const {
     }
 
     Node<KeyType>* current = minNode;
-    Node<KeyType>* start = minNode; 
 
-    do {
-        int degree = current->degree; 
-        Node<KeyType>* child = current->child;
-
-        cout << "B" << degree << ": ";
-        cout << current->key;
-
-        while (child != nullptr) {
-            cout << " " << child->key;
-            child = child->next;
-        }
-
+    while(current != nullptr){
+        Node<KeyType> *nextNode = current->next;
+        cout << "B" << current->degree << ":" << endl;
+        printTree(current);
         cout << endl;
+        current = nextNode;
 
-        current = current->next;
-    } while (current != start);
+        if (current == minNode) break;
+    }
+}
+
+template <typename KeyType>
+void printTree(Node<KeyType> *node) {
+    cout << node->key << " ";
+
+    Node<KeyType> *child = node->child;
+
+    while (child != nullptr) {
+        Node<KeyType> *nextChild = child->next;
+        printTree(child);
+        child = nextChild;
+    }
 }
 
 template <typename KeyType>

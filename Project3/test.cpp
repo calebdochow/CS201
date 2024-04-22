@@ -296,7 +296,6 @@ class BHeap {
     private:
         void consolidate() {
             int maxDegree = (int)(log2(size)) + 1;
-            cout << "MAX DEGREE: " << maxDegree << endl;
             Node<keytype> *array[maxDegree];
 
             for (int i = 0; i < maxDegree; i++) {
