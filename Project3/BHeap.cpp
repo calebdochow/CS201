@@ -173,7 +173,7 @@ void BHeap<KeyType>::printKey() const {
 
     while(current != nullptr){
         Node<KeyType> *nextNode = current->next;
-        cout << "B" << current->degree << ":" << endl;
+        cout << "B" << current->degree << ": ";
         printTree(current);
         cout << endl;
         current = nextNode;
