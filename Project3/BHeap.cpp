@@ -76,17 +76,11 @@ bool BHeap<KeyType>::isEmpty() const {
 
 template <typename KeyType>
 KeyType BHeap<KeyType>::peekKey() const {
-    if (isEmpty()) {
-        throw std::runtime_error("Heap is empty");
-    }
     return minNode->key;
 }
 
 template <typename KeyType>
 KeyType BHeap<KeyType>::extractMin() {
-    if (isEmpty()) {
-        throw std::runtime_error("Heap is empty");
-    }
     Node<KeyType>* x = minNode;
 
     if(x != nullptr){
